@@ -1,0 +1,82 @@
+{
+  "Increase efficiency": {
+    "methods": [
+      "Overhauling IT to be AI Ready",
+      "Implementing predictive analytics"
+    ],
+    "tools": {
+      "Overhauling IT to be AI Ready": {
+        "tools": [
+          "Gen AI UX interfaces",
+          "IOT and connected products"
+        ],
+        "use_cases": [
+          "Requirements Analysis",
+          "System Architecture Validation"
+        ],
+        "partners": [
+          "Silo AI",
+          "Assemblio"
+        ]
+      },
+      "Implementing predictive analytics": {
+        "tools": [
+          "Data Analytics",
+          "Process Mining"
+        ],
+        "use_cases": [
+          "Predictive Quality Analysis",
+          "BOM (Bill of Materials) Optimization"
+        ],
+        "partners": [
+          "Motius R&D",
+          "Sereene"
+        ]
+      }
+    },
+    "kpis": [
+      "Cycle time",
+      "Productivity"
+    ]
+  },
+  "Improve productivity": {
+    "methods": [
+      "Implementing predictive analytics",
+      "Leveraging AI for better processes"
+    ],
+    "tools": {
+      "Implementing predictive analytics": {
+        "tools": [
+          "IOT and connected products",
+          "AI in product functions"
+        ],
+        "use_cases": [
+          "Predictive Quality Analysis",
+          "BOM Optimization"
+        ],
+        "partners": [
+          "Motius R&D",
+          "Sereene"
+        ]
+      },
+      "Leveraging AI for better processes": {
+        "tools": [
+          "Data Analytics",
+          "Process Mining"
+        ],
+        "use_cases": [
+          "Variant Management Automation",
+          "System Architecture Validation"
+        ],
+        "partners": [
+          "Quality Minds",
+          "Assemblio"
+        ]
+      }
+    },
+    "kpis": [
+      "Revenue",
+      "Profit margins"
+    ]
+  }
+}
