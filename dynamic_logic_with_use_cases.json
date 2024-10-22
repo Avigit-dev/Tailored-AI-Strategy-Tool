@@ -1,82 +1,399 @@
-{
+{{
   "Increase efficiency": {
     "methods": [
       "Overhauling IT to be AI Ready",
-      "Implementing predictive analytics"
+      "Implementing predictive analytics",
+      "Leveraging AI for better processes"
     ],
     "tools": {
       "Overhauling IT to be AI Ready": {
         "tools": [
           "Gen AI UX interfaces",
-          "IOT and connected products"
+          "Process Mining",
+          "Data Analytics"
         ],
         "use_cases": [
           "Requirements Analysis",
-          "System Architecture Validation"
+          "Requirements Traceability",
+          "Maintaining Traceability"
         ],
         "partners": [
-          "Silo AI",
-          "Assemblio"
+          "Motius R&D",
+          "QualityMinds GmbH",
+          "Silo AI"
         ]
       },
       "Implementing predictive analytics": {
         "tools": [
           "Data Analytics",
-          "Process Mining"
+          "Process Mining",
+          "IOT and connected products"
         ],
         "use_cases": [
-          "Predictive Quality Analysis",
-          "BOM (Bill of Materials) Optimization"
+          "Automated Safety Analysis",
+          "Simulation and Testing Automation",
+          "Digital Twin for Integration Testing for Subsystems"
+        ],
+        "partners": [
+          "Dassault Systèmes",
+          "Siemens",
+          "Holo-Light GmbH"
+        ]
+      },
+      "Leveraging AI for better processes": {
+        "tools": [
+          "Process Mining",
+          "Data Analytics",
+          "IOT and connected products"
+        ],
+        "use_cases": [
+          "Cognitive Document Processing",
+          "Information Preparation and Analysis for Humans",
+          "Automated Configuration Compliance Check"
         ],
         "partners": [
           "Motius R&D",
-          "Sereene"
+          "QualityMinds GmbH",
+          "Silo AI"
         ]
       }
     },
     "kpis": [
       "Cycle time",
-      "Productivity"
+      "Productivity",
+      "Profit margins"
     ]
   },
   "Improve productivity": {
     "methods": [
       "Implementing predictive analytics",
-      "Leveraging AI for better processes"
+      "Leveraging AI for better processes",
+      "Overhauling IT to be AI Ready",
+      "Leveraging AI for better products"
     ],
     "tools": {
       "Implementing predictive analytics": {
         "tools": [
-          "IOT and connected products",
-          "AI in product functions"
+          "Process Mining",
+          "Data Analytics",
+          "IOT and connected products"
         ],
         "use_cases": [
-          "Predictive Quality Analysis",
-          "BOM Optimization"
+          "AI-Enhanced Product Lifecycle Management (PLM)",
+          "Automated Variant Testing",
+          "Test Data Generation"
         ],
         "partners": [
-          "Motius R&D",
-          "Sereene"
+          "Siemens",
+          "Dassault Systèmes",
+          "Motius R&D"
         ]
       },
       "Leveraging AI for better processes": {
         "tools": [
+          "Process Mining",
           "Data Analytics",
-          "Process Mining"
+          "AI in product functions"
         ],
         "use_cases": [
           "Variant Management Automation",
-          "System Architecture Validation"
+          "Configuration Management Automation",
+          "Digital Twin for Real-Time Monitoring System"
         ],
         "partners": [
-          "Quality Minds",
-          "Assemblio"
+          "Siemens",
+          "Dassault Systèmes",
+          "Motius R&D"
+        ]
+      },
+      "Leveraging AI for better products": {
+        "tools": [
+          "AI in product functions",
+          "IOT and connected products",
+          "Data Analytics"
+        ],
+        "use_cases": [
+          "Virtual Prototyping for Manufacturing Process Simulation",
+          "Virtual Prototyping for Stress Testing and Failure Prediction",
+          "Design for Manufacturing (DfM) Analysis"
+        ],
+        "partners": [
+          "Dassault Systèmes",
+          "Siemens",
+          "Holo-Light GmbH"
         ]
       }
     },
     "kpis": [
       "Revenue",
+      "Profit margins",
+      "Productivity",
+      "Cycle time"
+    ]
+  },
+  "Enhance customer experience": {
+    "methods": [
+      "Leveraging AI for better products",
+      "Overhauling IT to be AI Ready",
+      "Implementing predictive analytics"
+    ],
+    "tools": {
+      "Leveraging AI for better products": {
+        "tools": [
+          "Gen AI UX interfaces",
+          "AI in product functions",
+          "IOT and connected products"
+        ],
+        "use_cases": [
+          "Design Intent Recognition",
+          "Generative AI Design Improvements",
+          "Virtual Prototyping for User Experience Simulation"
+        ],
+        "partners": [
+          "Silo AI",
+          "Dassault Systèmes",
+          "Siemens"
+        ]
+      },
+      "Overhauling IT to be AI Ready": {
+        "tools": [
+          "Gen AI UX interfaces",
+          "Data Analytics",
+          "Process Mining"
+        ],
+        "use_cases": [
+          "Cognitive Document Processing",
+          "Maintaining Traceability",
+          "Information Preparation and Analysis for Humans"
+        ],
+        "partners": [
+          "Silo AI",
+          "Motius R&D",
+          "Siemens"
+        ]
+      },
+      "Implementing predictive analytics": {
+        "tools": [
+          "Data Analytics",
+          "IOT and connected products",
+          "Process Mining"
+        ],
+        "use_cases": [
+          "Voice of Customer Analysis",
+          "Product Feature Prioritization",
+          "AI-Based Design Review"
+        ],
+        "partners": [
+          "Silo AI",
+          "Motius R&D",
+          "NVIDIA"
+        ]
+      }
+    },
+    "kpis": [
+      "Revenue",
+      "Fewer cybersecurity incidents",
+      "Productivity",
       "Profit margins"
+    ]
+  },
+  "Gain market share": {
+    "methods": [
+      "Leveraging AI for better products",
+      "Implementing predictive analytics",
+      "Leveraging AI for better processes"
+    ],
+    "tools": {
+      "Leveraging AI for better products": {
+        "tools": [
+          "IOT and connected products",
+          "AI in product functions",
+          "Data Analytics"
+        ],
+        "use_cases": [
+          "Supply Chain Risk Prediction",
+          "Predictive Supplier Quality Assessment",
+          "AI-Based Prototyping Cost Analysis"
+        ],
+        "partners": [
+          "Silo AI",
+          "Motius R&D",
+          "Siemens"
+        ]
+      },
+      "Implementing predictive analytics": {
+        "tools": [
+          "Data Analytics",
+          "Process Mining",
+          "IOT and connected products"
+        ],
+        "use_cases": [
+          "Predictive Demand Analysis",
+          "Material Usage Forecasting",
+          "AI-Based Cost Estimation"
+        ],
+        "partners": [
+          "Silo AI",
+          "Motius R&D",
+          "NVIDIA"
+        ]
+      },
+      "Leveraging AI for better processes": {
+        "tools": [
+          "Process Mining",
+          "Data Analytics",
+          "AI in product functions"
+        ],
+        "use_cases": [
+          "Design Optimization",
+          "Feature Engineering for Product Performance",
+          "Design for Manufacturing (DfM) Analysis"
+        ],
+        "partners": [
+          "Silo AI",
+          "Dassault Systèmes",
+          "Siemens"
+        ]
+      }
+    },
+    "kpis": [
+      "Revenue",
+      "Profit margins",
+      "Cycle time",
+      "Productivity"
+    ]
+  },
+  "Create new revenue streams": {
+    "methods": [
+      "Leveraging AI for better products",
+      "Leveraging AI for better processes",
+      "Implementing predictive analytics"
+    ],
+    "tools": {
+      "Leveraging AI for better products": {
+        "tools": [
+          "IOT and connected products",
+          "AI in product functions",
+          "Gen AI UX interfaces"
+        ],
+        "use_cases": [
+          "Digital Twin for Predictive Maintenance Equipment",
+          "Digital Twin for Lifecycle Performance Analysis",
+          "AI-Based Innovation Forecasting"
+        ],
+        "partners": [
+          "Siemens",
+          "Dassault Systèmes",
+          "Motius R&D"
+        ]
+      },
+      "Leveraging AI for better processes": {
+        "tools": [
+          "Data Analytics",
+          "Process Mining",
+          "AI in product functions"
+        ],
+        "use_cases": [
+          "Automated Variant Testing",
+          "Virtual Prototyping",
+          "Virtual Prototyping for Supplier Collaboration"
+        ],
+        "partners": [
+          "Dassault Systèmes",
+          "Siemens",
+          "Holo-Light GmbH"
+        ]
+      },
+      "Implementing predictive analytics": {
+        "tools": [
+          "Data Analytics",
+          "IOT and connected products",
+          "Process Mining"
+        ],
+        "use_cases": [
+          "Predictive Sourcing",
+          "AI-Based Prototyping Cost Analysis",
+          "Material Usage Forecasting"
+        ],
+        "partners": [
+          "Silo AI",
+          "Motius R&D",
+          "NVIDIA"
+        ]
+      }
+    },
+    "kpis": [
+      "Revenue",
+      "Profit margins",
+      "Productivity",
+      "Reduced carbon emissions"
+    ]
+  },
+  "Competitive advantage": {
+    "methods": [
+      "Implementing predictive analytics",
+      "Leveraging AI for better products",
+      "Leveraging AI for better processes",
+      "Overhauling IT to be AI Ready"
+    ],
+    "tools": {
+      "Implementing predictive analytics": {
+        "tools": [
+          "Data Analytics",
+          "Process Mining",
+          "IOT and connected products"
+        ],
+        "use_cases": [
+          "System Architecture Validation",
+          "Simulation and Testing Automation",
+          "Virtual Prototyping for Stress Testing and Failure Prediction"
+        ],
+        "partners": [
+          "Dassault Systèmes",
+          "Siemens",
+          "Holo-Light GmbH"
+        ]
+      },
+      "Leveraging AI for better products": {
+        "tools": [
+          "AI in product functions",
+          "IOT and connected products",
+          "Data Analytics"
+        ],
+        "use_cases": [
+          "Design for Manufacturing (DfM) Analysis",
+          "AI-Based Innovation Forecasting",
+          "Generative AI Design Improvements"
+        ],
+        "partners": [
+          "Silo AI",
+          "Dassault Systèmes",
+          "Siemens"
+        ]
+      },
+      "Leveraging AI for better processes": {
+        "tools": [
+          "Process Mining",
+          "Data Analytics",
+          "AI in product functions"
+        ],
+        "use_cases": [
+          "Failure Mode and Effects Analysis (FMEA)",
+          "Risk Management",
+          "Supply Chain Risk Prediction"
+        ],
+        "partners": [
+          "Silo AI",
+          "Motius R&D",
+          "Siemens"
+        ]
+      }
+    },
+    "kpis": [
+      "Reduced carbon emissions",
+      "Profit margins",
+      "Fewer cybersecurity incidents",
+      "Cycle time"
     ]
   }
 }
