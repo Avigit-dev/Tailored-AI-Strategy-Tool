@@ -10,6 +10,21 @@ from reportlab.lib.pagesizes import landscape, A4
 from reportlab.lib import colors
 from textwrap import wrap
 
+# Add Caching
+@st.cache_data
+def load_dynamic_logic():
+    with open('dynamic_logic_with_use_cases.json', 'r') as file:
+        return json.load(file)
+
+dynamic_logic_with_use_cases = load_dynamic_logic()
+
+@st.cache_resource
+def load_image(image_path):
+    return Image.open(image_path)
+
+background_image = load_image("Background_Tool.png")
+logo_image = load_image("efeso_logo.png")
+
 # Load the logo and background image (Ensure the updated files are in the same directory as app.py)
 logo_path = "efeso_logo.png"
 background_image_path = "Background_Tool.png"
