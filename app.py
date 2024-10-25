@@ -170,57 +170,19 @@ def add_data_to_google_sheet(user_data):
     client = gspread.authorize(credentials)
     # Open your Google Sheet by name
     sheet = client.open("client_inputs_strategytoolrnd").sheet1
+
+    # Check if the sheet is empty (no data)
+    if not sheet.get_all_values():
+        # Write headers
+        headers = list(user_data.keys())
+        sheet.append_row(headers)
+
     # Append the data
     sheet.append_row(list(user_data.values()))
 
-# Contact information form
-with st.form("contact_form"):
-    st.write("### Please provide your contact information to download the report")
-    name = st.text_input("Name")
-    email = st.text_input("Email")
-    company = st.text_input("Company")
-    phone = st.text_input("Phone Number")
-    submitted = st.form_submit_button("Submit")
-    if submitted:
-        if name and email and company and phone:
-            # Collect data
-            user_data = {
-                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                'name': name,
-                'email': email,
-                'company': company,
-                'phone': phone,
-                'goal': goal,
-                'method': method,
-                'tool': tool,
-                'kpi': kpi,
-                'use_cases': ', '.join(use_cases),
-                'partners': ', '.join(partners)
-            }
-            # Save to Google Sheets
-            try:
-                add_data_to_google_sheet(user_data)
-                st.success("Your data has been saved.")
-            except Exception as e:
-                st.error(f"An error occurred while saving your data: {e}")
-            # Generate PDF
-            pdf_output = generate_pdf()
-            st.session_state.pdf_output = pdf_output
-            st.session_state.form_submitted = True
-            st.success("Your report is ready for download.")
-        else:
-            st.error("Please fill in all the contact information fields before downloading the report.")
+# **Moved the generate_pdf() function above its first call**
 
-# Display the download button if the form has been submitted
-if st.session_state.form_submitted and st.session_state.pdf_output:
-    st.download_button(
-        label="Click here to download your report",
-        data=st.session_state.pdf_output,
-        file_name="strategy_report.pdf",
-        mime="application/pdf"
-    )
-
-# Download button for the report in PDF format
+# Function to generate PDF
 def generate_pdf():
     pdf_buffer = io.BytesIO()
     c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
@@ -285,3 +247,50 @@ def generate_pdf():
     c.save()
     pdf_buffer.seek(0)
     return pdf_buffer
+
+# Contact information form
+with st.form("contact_form"):
+    st.write("### Please provide your contact information to download the report")
+    name = st.text_input("Name")
+    email = st.text_input("Email")
+    company = st.text_input("Company")
+    phone = st.text_input("Phone Number")
+    submitted = st.form_submit_button("Submit")
+    if submitted:
+        if name and email and company and phone:
+            # Collect data
+            user_data = {
+                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'name': name,
+                'email': email,
+                'company': company,
+                'phone': phone,
+                'goal': goal,
+                'method': method,
+                'tool': tool,
+                'kpi': kpi,
+                'use_cases': ', '.join(use_cases),
+                'partners': ', '.join(partners)
+            }
+            # Save to Google Sheets
+            try:
+                add_data_to_google_sheet(user_data)
+                st.success("Your data has been saved.")
+            except Exception as e:
+                st.error(f"An error occurred while saving your data: {e}")
+            # Generate PDF
+            pdf_output = generate_pdf()
+            st.session_state.pdf_output = pdf_output
+            st.session_state.form_submitted = True
+            st.success("Your report is ready for download.")
+        else:
+            st.error("Please fill in all the contact information fields before downloading the report.")
+
+# Display the download button if the form has been submitted
+if st.session_state.form_submitted and st.session_state.pdf_output:
+    st.download_button(
+        label="Click here to download your report",
+        data=st.session_state.pdf_output,
+        file_name="strategy_report.pdf",
+        mime="application/pdf"
+    )
