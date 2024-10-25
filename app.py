@@ -9,6 +9,9 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import landscape, A4
 from reportlab.lib import colors
 from textwrap import wrap
+from datetime import datetime
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 # Add Caching
 @st.cache_data
@@ -55,6 +58,12 @@ def get_tools_and_use_cases(goal: str, method: str) -> Tuple[List[str], List[str
     else:
         logger.error(f"Method '{method}' not found under goal '{goal}'.")
         return [], [], []
+
+# Initialize session state variables
+if 'form_submitted' not in st.session_state:
+    st.session_state.form_submitted = False
+if 'pdf_output' not in st.session_state:
+    st.session_state.pdf_output = None
 
 # Load and display the background image
 background = Image.open(background_image_path)
@@ -152,7 +161,64 @@ st.write(f"**Use Cases**: {', '.join(use_cases)}")
 st.write(f"### Suitable Partners:")
 st.write(f"**Partners**: {', '.join(partners)}")
 
+# Function to add data to Google Sheets
+def add_data_to_google_sheet(user_data):
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+        st.secrets["google_service_account"], scope
+    )
+    client = gspread.authorize(credentials)
+    # Open your Google Sheet by name
+    sheet = client.open("client_inputs_strategytoolrnd").sheet1
+    # Append the data
+    sheet.append_row(list(user_data.values()))
 
+# Contact information form
+with st.form("contact_form"):
+    st.write("### Please provide your contact information to download the report")
+    name = st.text_input("Name")
+    email = st.text_input("Email")
+    company = st.text_input("Company")
+    phone = st.text_input("Phone Number")
+    submitted = st.form_submit_button("Submit")
+    if submitted:
+        if name and email and company and phone:
+            # Collect data
+            user_data = {
+                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'name': name,
+                'email': email,
+                'company': company,
+                'phone': phone,
+                'goal': goal,
+                'method': method,
+                'tool': tool,
+                'kpi': kpi,
+                'use_cases': ', '.join(use_cases),
+                'partners': ', '.join(partners)
+            }
+            # Save to Google Sheets
+            try:
+                add_data_to_google_sheet(user_data)
+                st.success("Your data has been saved.")
+            except Exception as e:
+                st.error(f"An error occurred while saving your data: {e}")
+            # Generate PDF
+            pdf_output = generate_pdf()
+            st.session_state.pdf_output = pdf_output
+            st.session_state.form_submitted = True
+            st.success("Your report is ready for download.")
+        else:
+            st.error("Please fill in all the contact information fields before downloading the report.")
+
+# Display the download button if the form has been submitted
+if st.session_state.form_submitted and st.session_state.pdf_output:
+    st.download_button(
+        label="Click here to download your report",
+        data=st.session_state.pdf_output,
+        file_name="strategy_report.pdf",
+        mime="application/pdf"
+    )
 
 # Download button for the report in PDF format
 def generate_pdf():
@@ -180,13 +246,6 @@ def generate_pdf():
     # Add the statement with chosen inputs and wrap text to stay within page edges
     c.setFont("Helvetica-Bold", 14)
     y_position = height - background_height - logo_height - gap_after_heading - 80
-    statement = (
-        f"Our R&D Transformation goal is to "
-        f"{{goal}}, which will be accomplished by "
-        f"{{method}}, through the strategic initiatives in "
-        f"{{tool}}, and success will be evaluated by "
-        f"{{kpi}}."
-    )
     statement_parts = [
         ("Our R&D Transformation goal is to ", colors.black),
         (goal, colors.HexColor('#E96C25')),
@@ -196,6 +255,7 @@ def generate_pdf():
         (tool, colors.HexColor('#E96C25')),
         (", and success will be evaluated by ", colors.black),
         (kpi, colors.HexColor('#E96C25')),
+        (".", colors.black)
     ]
 
     x_position = 30
@@ -225,6 +285,3 @@ def generate_pdf():
     c.save()
     pdf_buffer.seek(0)
     return pdf_buffer
-
-pdf_output = generate_pdf()
-st.download_button(label="Download Strategy Report as PDF", data=pdf_output, file_name="strategy_report.pdf", mime="application/pdf")
