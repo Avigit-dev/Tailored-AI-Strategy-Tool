@@ -370,7 +370,7 @@ def maturity_assessment():
                     )
                     responses[q_id] = response
 
-            submitted = st.form_submit_button("Submit Assessment")
+            submitted = st.form_submit_button(label="Submit Assessment")  # Add explicit label
 
         # Check if the assessment form has been submitted
         if submitted:
@@ -382,7 +382,7 @@ def maturity_assessment():
                 email = st.text_input("Email")
                 company = st.text_input("Company")
                 phone = st.text_input("Phone Number")
-                contact_submitted = st.form_submit_button("Submit")
+                contact_submitted = st.form_submit_button(label="Submit Contact Info")  # Add explicit label
 
             # Check if the contact information form has been submitted
             if contact_submitted:
@@ -411,6 +411,7 @@ def maturity_assessment():
     else:
         st.write("Thank you for completing the assessment!")
         # You can add code here to display results or further information
+
 
 
 # Main application logic
