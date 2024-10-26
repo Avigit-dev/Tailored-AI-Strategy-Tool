@@ -198,21 +198,45 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
     c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))  # Set landscape orientation
     width, height = landscape(A4)  # Get dimensions for landscape
 
-    # Add the EFESO logo to the top-right corner of every page
+    # Add the cover page
+    c.showPage()  # Start a new page for the cover
+    # Add the background image to the top of the cover page
+    background_height = height * 0.4
+    c.drawImage(background_image_path, 0, height - background_height, width=width, height=background_height, mask='auto')
+
+    # Add the logo on the right side below the background image
     logo_width = 157.5
     logo_height = 60
     logo_margin_right = 30
-    logo_margin_top = 20
+    logo_position_y = height - background_height - logo_height - 30
+    c.drawImage(logo_path, width - logo_width - logo_margin_right, logo_position_y, width=logo_width, height=logo_height, mask='auto')
 
-    # Add histograms for each topic
+    # Add the main title for the cover page
+    c.setFont("Helvetica-Bold", 24)
+    c.setFillColor(colors.black)
+    c.drawString(30, logo_position_y - 40, "Maturity Assessment Report")
+
+    # Add user information on the cover page
+    y_position = logo_position_y - 80
+    c.setFont("Helvetica", 12)
+    for key, value in user_info.items():
+        c.drawString(30, y_position, f"{key}: {value}")
+        y_position -= 20
+
+    # Generate pages for each topic
     for topic in maturity_questions['topics']:
         c.showPage()
         topic_name = topic['name']
         topic_questions = topic['questions']
 
-        # Draw the logo at the top-right corner of each page
+        # Add the logo at the top-right corner of each page
         c.drawImage(logo_path, width - logo_width - logo_margin_right, height - logo_height - logo_margin_top, 
                     width=logo_width, height=logo_height, mask='auto')
+
+        # Add the topic name as the page title
+        c.setFont("Helvetica-Bold", 20)
+        c.setFillColor(colors.black)
+        c.drawString(30, height - 60, f"Topic: {topic_name}")
 
         # Define question numbers and maturity levels based on the responses
         question_numbers = [f"Q{i+1}" for i in range(len(topic_questions))]
@@ -220,7 +244,7 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
 
         # Set up the user session plot
         plt.figure(figsize=(4, 4))
-        plt.subplots_adjust(left=0.2, right=0.8, bottom=0.2, top=0.8)
+        plt.subplots_adjust(left=0.2, right=0.8, bottom=0.3, top=0.8)  # Adjusted to make more space for the title
 
         # Set y-axis ticks with user-defined range
         plt.yticks(range(y_axis_range[0], y_axis_range[1] + 1))
@@ -229,7 +253,7 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
         plt.bar(question_numbers, maturity_levels, color='#E96C25')
         plt.xlabel("Question Number")
         plt.ylabel("Maturity Level")
-        plt.title(f"User Session Data - {topic_name}")
+        plt.title(f"User Session Data - {topic_name}", fontsize=10, pad=20)  # Adjusted title size and padding
 
         # Save the user session plot to a temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
@@ -238,7 +262,7 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
         plt.close()
 
         # Adjust the y-coordinate for the plot to move it up by a couple of centimeters
-        plot_margin_top = 80  # Adjusted to move plots upwards by approximately 2 cm
+        plot_margin_top = 100  # Adjusted to move plots upwards
         plot_height = height * 0.5  # Adjust plot height to fit within the left half
         plot_width = width * 0.45   # Adjust plot width to fit in half of the page
 
@@ -275,7 +299,6 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
     c.save()
     pdf_buffer.seek(0)
     return pdf_buffer
-
 # Strategy Tool Module
 def strategy_tool():
     # Load and display the background image
