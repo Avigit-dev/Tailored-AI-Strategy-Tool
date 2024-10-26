@@ -222,7 +222,12 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
     # Add histograms for each topic
     for topic in maturity_questions['topics']:
         c.showPage()
-        # ... (rest of your code for topic name and questions) ...
+        topic_name = topic['name']
+        topic_questions = topic['questions']
+
+        # Define question numbers and maturity levels based on the responses
+        question_numbers = [f"Q{i+1}" for i in range(len(topic_questions))]
+        maturity_levels = [responses[q['id']] for q in topic_questions]
 
         plt.figure(figsize=(8, 4))
         plt.subplots_adjust(left=0.2, right=0.8, bottom=0.2, top=0.8)
@@ -230,18 +235,18 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
         # Set y-axis ticks with user-defined range
         plt.yticks(range(y_axis_range[0], y_axis_range[1] + 1))
 
+        # Create bar plot with question numbers and maturity levels
         plt.bar(question_numbers, maturity_levels, color='#E96C25')
         plt.xlabel("Question Number")
         plt.ylabel("Maturity Level")
 
         # Set x-axis labels
-        x_labels = [f"q{i+1}" for i in range(len(topic_questions))]
-        plt.xticks(range(len(x_labels)), x_labels, rotation=45, ha="right")
+        plt.xticks(rotation=45, ha="right")
 
         # Add the topic title to the plot
         plt.title(f"Maturity Levels for {topic_name}")
 
-        # Add legend
+        # Add legend for each question
         legend_labels = [q['question'] for q in topic_questions]
         plt.legend(legend_labels, loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=2)
 
