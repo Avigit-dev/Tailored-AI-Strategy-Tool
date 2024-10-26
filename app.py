@@ -15,6 +15,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import matplotlib.pyplot as plt
 from reportlab.lib.units import inch
 import tempfile
+from reportlab.pdfgen import canvas
 
 # Add Sidebar Navigation
 st.sidebar.title("Navigation")
