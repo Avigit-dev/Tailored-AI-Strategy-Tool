@@ -4,3 +4,4 @@ reportlab
 streamlit-authenticator
 gspread
 oauth2client
+matplotlib
