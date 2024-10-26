@@ -15,7 +15,6 @@ from oauth2client.service_account import ServiceAccountCredentials
 import matplotlib.pyplot as plt
 from reportlab.lib.units import inch
 import tempfile
-from reportlab.pdfgen import canvas
 
 # Add Sidebar Navigation
 st.sidebar.title("Navigation")
@@ -263,7 +262,6 @@ def generate_assessment_pdf(responses, user_info):
     c.save()
     pdf_buffer.seek(0)
     return pdf_buffer.getvalue()
-
 
 # Strategy Tool Module
 def strategy_tool():
