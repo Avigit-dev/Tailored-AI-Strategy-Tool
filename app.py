@@ -353,14 +353,17 @@ def maturity_assessment():
     scale = maturity_questions['scale']
     responses = {}
 
+    # Check if the assessment has been submitted already
     if not st.session_state.get('assessment_submitted', False):
+        # Start the assessment form
         with st.form("assessment_form"):
             for topic in maturity_questions['topics']:
                 st.header(topic['name'])
                 for question in topic['questions']:
                     q_id = question['id']
+                    # Ensure every radio button has a meaningful label for accessibility
                     response = st.radio(
-                        question['question'],
+                        label=question['question'],  # Set the question text as the label
                         options=[1, 2, 3, 4, 5],
                         format_func=lambda x: f"{x} - {scale[str(x)]}",
                         key=q_id
@@ -369,16 +372,19 @@ def maturity_assessment():
 
             submitted = st.form_submit_button("Submit Assessment")
 
+        # Check if the assessment form has been submitted
         if submitted:
             # Collect user's contact information
             st.write("### Please provide your contact information to view your results")
             with st.form("assessment_contact_form"):
+                # Add labels to each input for accessibility
                 name = st.text_input("Name")
                 email = st.text_input("Email")
                 company = st.text_input("Company")
                 phone = st.text_input("Phone Number")
                 contact_submitted = st.form_submit_button("Submit")
 
+            # Check if the contact information form has been submitted
             if contact_submitted:
                 if name and email and company and phone:
                     # Prepare data for saving
@@ -405,6 +411,7 @@ def maturity_assessment():
     else:
         st.write("Thank you for completing the assessment!")
         # You can add code here to display results or further information
+
 
 # Main application logic
 if app_mode == "Strategy Tool":
