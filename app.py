@@ -27,10 +27,6 @@ if 'assessment_submitted' not in st.session_state:
     st.session_state.assessment_submitted = False
 if 'assessment_pdf' not in st.session_state:
     st.session_state.assessment_pdf = None
-if 'contact_submitted' not in st.session_state:
-    st.session_state.contact_submitted = False
-if 'responses' not in st.session_state:
-    st.session_state.responses = {}
 
 # Load images
 @st.cache_resource
@@ -91,6 +87,7 @@ def add_data_to_google_sheet(user_data):
             st.secrets["google_service_account"], scope
         )
         client = gspread.authorize(credentials)
+        # Open your Google Sheet by name
         sheet = client.open("client_inputs_strategytoolrnd").sheet1
 
         if not sheet.get_all_values():
@@ -125,21 +122,285 @@ def add_assessment_data_to_google_sheet(user_data):
         print(f"Error while saving data: {e}")
         return False
 
-# Generate PDF functions (unchanged)
+# Generate PDF functions for Strategy Tool and Maturity Assessment
 def generate_pdf(goal, method, tool, kpi, use_cases, partners):
-    # Your existing generate_pdf implementation
-    pass
+    pdf_buffer = io.BytesIO()
+    c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
+    width, height = landscape(A4)
+
+    # Add the background image to the top 40% of the page
+    background_height = height * 0.4
+    c.drawImage(background_image_path, 0, height - background_height, width=width, height=background_height, mask='auto')
+
+    # Add the logo on the right side below the background image
+    logo_width = 157.5  # Increased by 5%
+    logo_height = 60
+    c.drawImage(logo_path, width - logo_width - 30, height - background_height - logo_height - 10, width=logo_width, height=logo_height, mask='auto')
+
+    # Add the heading on the left side below the logo
+    c.setFont("Helvetica-Bold", 16)
+    c.setFillColor(colors.black)
+    c.drawString(30, height - background_height - logo_height - 40, "Tailored AI Strategy Report")
+
+    # Decrease gap after heading by 5%
+    gap_after_heading = 40 * 0.95
+
+    # Add the statement with chosen inputs and wrap text to stay within page edges
+    c.setFont("Helvetica-Bold", 14)
+    y_position = height - background_height - logo_height - gap_after_heading - 80
+    statement_parts = [
+        ("Our R&D Transformation goal is to ", colors.black),
+        (goal, colors.HexColor('#E96C25')),
+        (", which will be accomplished by ", colors.black),
+        (method, colors.HexColor('#E96C25')),
+        (", through the strategic initiatives in ", colors.black),
+        (tool, colors.HexColor('#E96C25')),
+        (", and success will be evaluated by ", colors.black),
+        (kpi, colors.HexColor('#E96C25')),
+        (".", colors.black)
+    ]
+
+    x_position = 30
+    max_width = width - 60  # Leave some margin on both sides
+    for text, color in statement_parts:
+        text_width = c.stringWidth(text, "Helvetica-Bold", 14)
+        if x_position + text_width > max_width:
+            y_position -= 20
+            x_position = 30
+        c.setFillColor(color)
+        c.drawString(x_position, y_position, text)
+        x_position += text_width
+
+    # Add recommended use cases and partners
+    y_position -= 40
+    c.setFont("Helvetica", 12)
+    c.setFillColor(colors.black)
+    c.drawString(30, y_position, "Recommended Use Cases:")
+    y_position -= 20
+    c.drawString(30, y_position, ', '.join(use_cases))
+
+    y_position -= 40
+    c.drawString(30, y_position, "Suitable Partners:")
+    y_position -= 20
+    c.drawString(30, y_position, ', '.join(partners))
+
+    c.save()
+    pdf_buffer.seek(0)
+    return pdf_buffer
 
 def generate_assessment_pdf(responses, user_info):
-    # Your existing generate_assessment_pdf implementation
-    pass
+    pdf_buffer = io.BytesIO()
+    c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
+    width, height = landscape(A4)
 
-# Strategy Tool Module (unchanged)
+    # Add the background image to the top of the page
+    background_height = height * 0.4
+    c.drawImage(background_image_path, 0, height - background_height, width=width, height=background_height, mask='auto')
+
+    # Add the logo in the top-right corner
+    logo_width = 157.5
+    logo_height = 60
+    c.drawImage(logo_path, width - logo_width - 30, height - background_height - logo_height - 10, width=logo_width, height=logo_height, mask='auto')
+
+    # Add the heading below the logo
+    c.setFont("Helvetica-Bold", 16)
+    c.setFillColor(colors.black)
+    c.drawString(30, height - background_height - logo_height - 40, "Maturity Assessment Report")
+
+    # Add user information
+    y_position = height - background_height - logo_height - 60
+    c.setFont("Helvetica", 12)
+    for key, value in user_info.items():
+        c.drawString(30, y_position, f"{key}: {value}")
+        y_position -= 20
+
+    # Add histograms for each topic
+    for topic in maturity_questions['topics']:
+        c.showPage()  # Start a new page for each topic
+        topic_name = topic['name']
+        topic_questions = topic['questions']
+        
+        # Generate the histogram plot
+        question_numbers = [q['id'] for q in topic_questions]
+        maturity_levels = [responses[q_id] for q_id in question_numbers]
+        
+        plt.figure(figsize=(8, 4))
+        plt.bar(question_numbers, maturity_levels, color='#E96C25')
+        plt.xlabel("Question Number")
+        plt.ylabel("Maturity Level")
+        plt.title(f"Maturity Levels for {topic_name}")
+        
+        # Save the plot to a temporary buffer and add it to the PDF
+        img_buffer = io.BytesIO()
+        plt.savefig(img_buffer, format='PNG')
+        plt.close()
+        
+        img_buffer.seek(0)
+        c.drawImage(img_buffer, inch, height / 2, width=width - 2 * inch, preserveAspectRatio=True, anchor='c')
+        
+        # Add the topic title
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(30, height - 60, f"Topic: {topic_name}")
+        
+    c.save()
+    pdf_buffer.seek(0)
+    return pdf_buffer
+# Strategy Tool Module
 def strategy_tool():
-    # Your existing strategy_tool implementation
-    pass
+    # Load and display the background image
+    st.image(background_image, use_column_width=True)
 
-# Maturity Assessment Module (Fixed version)
+    # Streamlit App Custom Styling
+    st.markdown(f"""
+        <style>
+            .header {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }}
+            .header h1 {{
+                font-size: 2.5em;
+                color: #333;
+                margin-right: 20px;
+            }}
+            .dropdown-text {{
+                font-weight: bold;
+                font-size: 1.2em;
+                color: #333;
+            }}
+            .stButton button {{
+                background-color: #E96C25;
+                color: white;
+            }}
+            .stDownloadButton button {{
+                background-color: #E96C25;
+                color: white;
+            }}
+            .full-width {{
+                width: 100%;
+            }}
+            .horizontal-container {{
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 15px;
+                margin-bottom: 20px;
+            }}
+            .horizontal-container > div {{
+                flex: 1;
+                min-width: 150px;
+            }}
+            .orange-text {{
+                color: #E96C25;
+            }}
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Display the header with title and logo
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown("<h1>Tailored AI Strategy Tool</h1>", unsafe_allow_html=True)
+    with col2:
+        st.image(logo_path, use_column_width=False, width=300)
+
+    # Create a horizontal layout for the sentence and dropdowns
+    st.markdown("<div class='horizontal-container'>", unsafe_allow_html=True)
+
+    # Dropdown for selecting a goal
+    st.markdown("<div class='dropdown-text'>Our R&D Transformation goal is to:</div>", unsafe_allow_html=True)
+    goal = st.selectbox('', list(dynamic_logic_with_use_cases.keys()), label_visibility='collapsed')
+
+    # Static text
+    st.markdown("<div class='dropdown-text'>which will be accomplished by</div>", unsafe_allow_html=True)
+
+    # Dropdown for methods based on goal selection
+    if goal:
+        methods = get_available_options(goal)
+        method = st.selectbox('', methods, label_visibility='collapsed')
+    else:
+        st.warning("Please select a goal.")
+        return
+
+    # Static text
+    st.markdown("<div class='dropdown-text'>through the strategic initiatives in</div>", unsafe_allow_html=True)
+
+    # Dropdown for tools based on method selection
+    if method:
+        tools, use_cases, partners = get_tools_and_use_cases(goal, method)
+        tool = st.selectbox('', tools, label_visibility='collapsed')
+    else:
+        st.warning("Please select a method.")
+        return
+
+    # Static text
+    st.markdown("<div class='dropdown-text'>and success will be evaluated by</div>", unsafe_allow_html=True)
+    if tool:
+        kpi = st.selectbox('', dynamic_logic_with_use_cases[goal]['kpis'], label_visibility='collapsed')
+    else:
+        st.warning("Please select a tool.")
+        return
+
+    # Close the horizontal layout for dropdowns
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Display use cases and partners based on selections
+    st.write(f"### Recommended Use Cases for {goal}:")
+    st.write(f"**Use Cases**: {', '.join(use_cases)}")
+
+    st.write(f"### Suitable Partners:")
+    st.write(f"**Partners**: {', '.join(partners)}")
+
+    # Contact information form
+    with st.form("contact_form"):
+        st.write("### Please provide your contact information to download the report")
+        name = st.text_input("Name")
+        email = st.text_input("Email")
+        company = st.text_input("Company")
+        phone = st.text_input("Phone Number")
+        submitted = st.form_submit_button("Submit")
+    if submitted:
+        if name and email and company and phone:
+            # Collect data
+            user_data = {
+                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'name': name,
+                'email': email,
+                'company': company,
+                'phone': phone,
+                'goal': goal,
+                'method': method,
+                'tool': tool,
+                'kpi': kpi,
+                'use_cases': ', '.join(use_cases),
+                'partners': ', '.join(partners)
+            }
+            # Save to Google Sheets
+            try:
+                add_data_to_google_sheet(user_data)
+                st.success("Your data has been saved.")
+            except Exception as e:
+                st.error(f"An error occurred while saving your data: {e}")
+                print(f"Error: {e}")
+            # Generate PDF
+            pdf_output = generate_pdf(goal, method, tool, kpi, use_cases, partners)
+            st.session_state.pdf_output = pdf_output
+            st.session_state.form_submitted = True
+            st.success("Your report is ready for download.")
+        else:
+            st.error("Please fill in all the contact information fields before downloading the report.")
+
+    # Display the download button if the form has been submitted
+    if st.session_state.form_submitted and st.session_state.pdf_output:
+        st.download_button(
+            label="Click here to download your report",
+            data=st.session_state.pdf_output,
+            file_name="strategy_report.pdf",
+            mime="application/pdf"
+        )
+
+# Maturity Assessment Module
 def maturity_assessment():
     st.title("Maturity Assessment")
 
@@ -148,44 +409,41 @@ def maturity_assessment():
     st.image(logo_image, use_column_width=False, width=300)
 
     scale = maturity_questions['scale']
+    responses = {}
 
-    # Display the questionnaire first if responses haven't been collected
-    if not st.session_state.assessment_submitted:
-        with st.form(key="assessment_form", clear_on_submit=False):
-            st.write("### Please complete the assessment")
-            
-            responses = {}
+    # Check if the assessment has been submitted already
+    if not st.session_state.get('assessment_submitted', False):
+        # Start the assessment form
+        with st.form("assessment_form"):
             for topic in maturity_questions['topics']:
                 st.header(topic['name'])
                 for question in topic['questions']:
                     q_id = question['id']
-                    st.write(question['question'])
                     response = st.radio(
-                        label=f"Question {q_id}",  # Providing a non-empty label
+                        label=question['question'],
                         options=[1, 2, 3, 4, 5],
                         format_func=lambda x: f"{x} - {scale[str(x)]}",
-                        key=f"q_{q_id}",
-                        horizontal=True
+                        key=q_id,
+                        label_visibility="collapsed"  # Use "collapsed" to hide label text if already displayed
                     )
                     responses[q_id] = response
-            
-            submit_assessment = st.form_submit_button("Submit Assessment")
-            if submit_assessment:
-                st.session_state.responses = responses
-                st.session_state.assessment_submitted = True
-                st.rerun()
 
-    # After assessment is submitted, show contact form if contact info hasn't been submitted
-    elif not st.session_state.contact_submitted:
-        st.write("### Please provide your contact information to view your results and download the report")
-        with st.form(key="contact_form", clear_on_submit=False):
-            name = st.text_input("Full Name", key="name")
-            email = st.text_input("Email Address", key="email")
-            company = st.text_input("Company Name", key="company")
-            phone = st.text_input("Phone Number", key="phone")
-            
-            submit_contact = st.form_submit_button("Submit Contact Information")
-            if submit_contact:
+            submitted = st.form_submit_button(label="Submit Assessment")  # Add explicit label
+
+        # Check if the assessment form has been submitted
+        if submitted:
+            # Collect user's contact information
+            st.write("### Please provide your contact information to view your results and download the report")
+            with st.form("assessment_contact_form"):
+                # Add labels to each input for accessibility and set label_visibility to "collapsed"
+                name = st.text_input("Name", label_visibility="collapsed")
+                email = st.text_input("Email", label_visibility="collapsed")
+                company = st.text_input("Company", label_visibility="collapsed")
+                phone = st.text_input("Phone Number", label_visibility="collapsed")
+                contact_submitted = st.form_submit_button(label="Submit Contact Info")  # Add explicit label
+
+            # Check if the contact information form has been submitted
+            if contact_submitted:
                 if name and email and company and phone:
                     # Prepare data for saving
                     user_data = {
@@ -194,44 +452,42 @@ def maturity_assessment():
                         'Email': email,
                         'Company': company,
                         'Phone': phone,
-                        **st.session_state.responses
+                        **responses
                     }
-                    
                     # Save to Google Sheets
-                    if add_assessment_data_to_google_sheet(user_data):
-                        # Generate the PDF report
-                        pdf_output = generate_assessment_pdf(st.session_state.responses, {
-                            'Name': name,
-                            'Email': email,
-                            'Company': company,
-                            'Phone': phone
-                        })
-                        st.session_state.assessment_pdf = pdf_output
-                        st.session_state.contact_submitted = True
-                        st.rerun()
+                    try:
+                        add_assessment_data_to_google_sheet(user_data)
+                        st.success("Your data has been saved.")
+                        st.session_state.assessment_submitted = True
+                    except Exception as e:
+                        st.error(f"An error occurred while saving your data: {e}")
+                        print(f"Error: {e}")
+
+                    # Generate the PDF report
+                    pdf_output = generate_assessment_pdf(responses, {
+                        'Name': name,
+                        'Email': email,
+                        'Company': company,
+                        'Phone': phone
+                    })
+                    st.session_state.assessment_pdf = pdf_output  # Save PDF to session state
+                    st.success("Your report is ready for download!")
                 else:
                     st.error("Please fill in all the contact information fields.")
-
-    # After both assessment and contact info are submitted, show download option
     else:
-        st.success("Thank you for completing the assessment!")
-        if st.session_state.assessment_pdf is not None:
+        st.write("Thank you for completing the assessment!")
+        # Add download button for the report
+        if 'assessment_pdf' in st.session_state:
             st.download_button(
                 label="Download Assessment Report",
                 data=st.session_state.assessment_pdf,
                 file_name="maturity_assessment_report.pdf",
                 mime="application/pdf"
             )
-        
-        # Add a reset button
-        if st.button("Start New Assessment"):
-            for key in ['assessment_submitted', 'contact_submitted', 'responses', 'assessment_pdf']:
-                if key in st.session_state:
-                    del st.session_state[key]
-            st.rerun()
 
 # Main application logic
 if app_mode == "Strategy Tool":
     strategy_tool()
 elif app_mode == "Maturity Assessment":
     maturity_assessment()
+
