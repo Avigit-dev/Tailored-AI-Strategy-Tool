@@ -246,10 +246,6 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
         # Add the topic title to the plot
         plt.title(f"Maturity Levels for {topic_name}")
 
-        # Construct the legend with detailed question text
-        legend_labels = [f"{question_numbers[i]} - {topic_questions[i]['question']}" for i in range(len(topic_questions))]
-        plt.figtext(0.5, -0.15, "\n".join(legend_labels), wrap=True, horizontalalignment='center', fontsize=8)
-
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
             plt.savefig(tmp_file.name, format='PNG')
             tmp_file_path = tmp_file.name
@@ -261,6 +257,18 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
         c.drawImage(tmp_file_path, width * 0.1, y_coordinate, width=width * 0.8, preserveAspectRatio=True, anchor='c')
 
         os.remove(tmp_file_path)
+
+        # Add the legend below the plot
+        legend_labels = [f"{question_numbers[i]} - {topic_questions[i]['question']}" for i in range(len(topic_questions))]
+        legend_text = "\n".join(legend_labels)
+
+        # Adjust y_position to place the legend just below the plot
+        legend_y_position = y_coordinate - 20
+        c.setFont("Helvetica", 10)
+        c.setFillColor(colors.black)
+        for line in legend_text.split("\n"):
+            c.drawString(30, legend_y_position, line)
+            legend_y_position -= 15
 
     c.save()
     pdf_buffer.seek(0)
