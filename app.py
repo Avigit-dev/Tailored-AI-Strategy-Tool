@@ -195,8 +195,8 @@ def generate_pdf(goal, method, tool, kpi, use_cases, partners):
 # Generate PDF functions for Strategy Tool and Maturity Assessment
 def generate_assessment_pdf(responses, user_info, y_axis_range):
     pdf_buffer = io.BytesIO()
-    c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))  # Set page layout to landscape
-    width, height = landscape(A4)
+    c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))  # Set landscape orientation
+    width, height = landscape(A4)  # Get dimensions for landscape
 
     # Add the background image to the top of the page
     background_height = height * 0.4
@@ -221,46 +221,40 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
 
     # Add histograms for each topic
     for topic in maturity_questions['topics']:
-        c.showPage()  # Start a new page for each topic
-        topic_name = topic['name']
-        topic_questions = topic['questions']
+        c.showPage()
+        # ... (rest of your code for topic name and questions) ...
 
-        # Generate the histogram plot
-        question_numbers = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5']  # Set fixed labels for X-axis
-        maturity_levels = [responses[q['id']] for q in topic_questions]
-
-        # Adjust figure size for A4 and reduce margins
-        plt.figure(figsize=(10, 5))
+        plt.figure(figsize=(8, 4))
         plt.subplots_adjust(left=0.2, right=0.8, bottom=0.2, top=0.8)
 
-        # Set y-axis range as per user input
-        plt.ylim(0, y_axis_range)
-        plt.yticks(range(0, y_axis_range + 1))
+        # Set y-axis ticks with user-defined range
+        plt.yticks(range(y_axis_range[0], y_axis_range[1] + 1))
 
         plt.bar(question_numbers, maturity_levels, color='#E96C25')
         plt.xlabel("Question Number")
         plt.ylabel("Maturity Level")
 
-        # Rotate x-axis labels for better readability
-        plt.xticks(rotation=45, ha="right")
+        # Set x-axis labels
+        x_labels = [f"q{i+1}" for i in range(len(topic_questions))]
+        plt.xticks(range(len(x_labels)), x_labels, rotation=45, ha="right")
 
         # Add the topic title to the plot
         plt.title(f"Maturity Levels for {topic_name}")
 
-        # Add a legend below the plot for the questions
-        legend_text = "\n".join([f"{qn}: {q['question']}" for qn, q in zip(question_numbers, topic_questions)])
-        plt.figtext(0.5, 0.01, legend_text, wrap=True, horizontalalignment='center', fontsize=8)
+        # Add legend
+        legend_labels = [q['question'] for q in topic_questions]
+        plt.legend(legend_labels, loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=2)
 
-        # Save the plot to a temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
             plt.savefig(tmp_file.name, format='PNG')
             tmp_file_path = tmp_file.name
         plt.close()
 
-        # Center the plot image on the PDF page
-        c.drawImage(tmp_file_path, width * 0.1, height / 4, width=width * 0.8, preserveAspectRatio=True, anchor='c')
+        # Center the plot image (both horizontally and vertically)
+        image_height = width * 0.8 * (height / width)
+        y_coordinate = (height - image_height) / 2
+        c.drawImage(tmp_file_path, width * 0.1, y_coordinate, width=width * 0.8, preserveAspectRatio=True, anchor='c')
 
-        # Remove the temporary file
         os.remove(tmp_file_path)
 
     c.save()
