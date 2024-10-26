@@ -212,44 +212,47 @@ def generate_assessment_pdf(responses, user_info):
     c.setFillColor(colors.black)
     c.drawString(30, height - background_height - logo_height - 40, "Maturity Assessment Report")
 
-    # Add user information
+   # Add user information
     y_position = height - background_height - logo_height - 60
-    c.setFont("Helvetica", 12)
+    c.setFont("Helvetica", 10)  # Decreased font size for user info
     for key, value in user_info.items():
         c.drawString(30, y_position, f"{key}: {value}")
-        y_position -= 20
+        y_position -= 15  # Reduced spacing for user info
 
-    # Add histograms for each topic
-    for topic in maturity_questions['topics']:
-        c.showPage()  # Start a new page for each topic
+    # --- Changes for histogram layout ---
+    c.showPage()  # Start a new page for histograms
+    num_topics = len(maturity_questions['topics'])
+    plot_width = (width - 2 * inch) / num_topics  # Adjust width based on number of topics
+    plot_height = height / 2.5  # Reduced height for fitting on one page
+    x_positions = [inch + i * plot_width for i in range(num_topics)]  # Calculate x positions
+
+    for i, topic in enumerate(maturity_questions['topics']):
         topic_name = topic['name']
         topic_questions = topic['questions']
-        
-        # Generate the histogram plot
+
+        # Generate the histogram plot with adjusted size
         question_numbers = [q['id'] for q in topic_questions]
         maturity_levels = [responses[q_id] for q_id in question_numbers]
-        
-        plt.figure(figsize=(8, 4))
+
+        plt.figure(figsize=(plot_width / inch, plot_height / inch))  # Adjust figsize
         plt.bar(question_numbers, maturity_levels, color='#E96C25')
-        plt.xlabel("Question Number")
-        plt.ylabel("Maturity Level")
-        plt.title(f"Maturity Levels for {topic_name}")
-        
+        plt.xlabel("Question Number", fontsize=8)  # Reduced font size
+        plt.ylabel("Maturity Level", fontsize=8)  # Reduced font size
+        plt.title(f"Maturity Levels for {topic_name}", fontsize=10)  # Reduced font size
+        plt.xticks(fontsize=8)  # Reduced font size for x-axis ticks
+        plt.yticks(fontsize=8)  # Reduced font size for y-axis ticks
+
         # Save the plot to a temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
             plt.savefig(tmp_file.name, format='PNG')
             tmp_file_path = tmp_file.name
         plt.close()
-        
-        # Add the plot image to the PDF
-        c.drawImage(tmp_file_path, inch, height / 2, width=width - 2 * inch, preserveAspectRatio=True, anchor='c')
-        
+
+        # Add the plot image to the PDF at calculated position
+        c.drawImage(tmp_file_path, x_positions[i], height / 2 - plot_height / 2, width=plot_width, height=plot_height, preserveAspectRatio=True)
+
         # Remove the temporary file
         os.remove(tmp_file_path)
-
-        # Add the topic title
-        c.setFont("Helvetica-Bold", 14)
-        c.drawString(30, height - 60, f"Topic: {topic_name}")
         
     c.save()
     pdf_buffer.seek(0)
