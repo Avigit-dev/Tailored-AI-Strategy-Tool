@@ -13,6 +13,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import matplotlib.pyplot as plt
 from reportlab.lib.units import inch
+import tempfile
 
 # Add Sidebar Navigation
 st.sidebar.title("Navigation")
@@ -190,6 +191,7 @@ def generate_pdf(goal, method, tool, kpi, use_cases, partners):
     pdf_buffer.seek(0)
     return pdf_buffer
 
+# Generate PDF functions for Strategy Tool and Maturity Assessment
 def generate_assessment_pdf(responses, user_info):
     pdf_buffer = io.BytesIO()
     c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
@@ -232,14 +234,18 @@ def generate_assessment_pdf(responses, user_info):
         plt.ylabel("Maturity Level")
         plt.title(f"Maturity Levels for {topic_name}")
         
-        # Save the plot to a temporary buffer and add it to the PDF
-        img_buffer = io.BytesIO()
-        plt.savefig(img_buffer, format='PNG')
+        # Save the plot to a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
+            plt.savefig(tmp_file.name, format='PNG')
+            tmp_file_path = tmp_file.name
         plt.close()
         
-        img_buffer.seek(0)
-        c.drawImage(img_buffer, inch, height / 2, width=width - 2 * inch, preserveAspectRatio=True, anchor='c')
+        # Add the plot image to the PDF
+        c.drawImage(tmp_file_path, inch, height / 2, width=width - 2 * inch, preserveAspectRatio=True, anchor='c')
         
+        # Remove the temporary file
+        os.remove(tmp_file_path)
+
         # Add the topic title
         c.setFont("Helvetica-Bold", 14)
         c.drawString(30, height - 60, f"Topic: {topic_name}")
