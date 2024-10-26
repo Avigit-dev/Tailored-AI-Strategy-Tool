@@ -250,8 +250,159 @@ def generate_assessment_pdf(responses, user_info):
 
 # Strategy Tool Module
 def strategy_tool():
-    # [Strategy Tool code remains exactly the same]
-    # ... [Previous strategy_tool implementation]
+    # Load and display the background image
+    st.image(background_image, use_column_width=True)
+
+    # Streamlit App Custom Styling
+    st.markdown(f"""
+        <style>
+            .header {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }}
+            .header h1 {{
+                font-size: 2.5em;
+                color: #333;
+                margin-right: 20px;
+            }}
+            .dropdown-text {{
+                font-weight: bold;
+                font-size: 1.2em;
+                color: #333;
+            }}
+            .stButton button {{
+                background-color: #E96C25;
+                color: white;
+            }}
+            .stDownloadButton button {{
+                background-color: #E96C25;
+                color: white;
+            }}
+            .full-width {{
+                width: 100%;
+            }}
+            .horizontal-container {{
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 15px;
+                margin-bottom: 20px;
+            }}
+            .horizontal-container > div {{
+                flex: 1;
+                min-width: 150px;
+            }}
+            .orange-text {{
+                color: #E96C25;
+            }}
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Display the header with title and logo
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown("<h1>Tailored AI Strategy Tool</h1>", unsafe_allow_html=True)
+    with col2:
+        st.image(logo_path, use_column_width=False, width=300)
+
+    # Create a horizontal layout for the sentence and dropdowns
+    st.markdown("<div class='horizontal-container'>", unsafe_allow_html=True)
+
+    # Dropdown for selecting a goal
+    st.markdown("<div class='dropdown-text'>Our R&D Transformation goal is to:</div>", unsafe_allow_html=True)
+    goal = st.selectbox('', list(dynamic_logic_with_use_cases.keys()), label_visibility='collapsed')
+
+    # Static text
+    st.markdown("<div class='dropdown-text'>which will be accomplished by</div>", unsafe_allow_html=True)
+
+    # Dropdown for methods based on goal selection
+    if goal:
+        methods = get_available_options(goal)
+        method = st.selectbox('', methods, label_visibility='collapsed')
+    else:
+        st.warning("Please select a goal.")
+        return
+
+    # Static text
+    st.markdown("<div class='dropdown-text'>through the strategic initiatives in</div>", unsafe_allow_html=True)
+
+    # Dropdown for tools based on method selection
+    if method:
+        tools, use_cases, partners = get_tools_and_use_cases(goal, method)
+        tool = st.selectbox('', tools, label_visibility='collapsed')
+    else:
+        st.warning("Please select a method.")
+        return
+
+    # Static text
+    st.markdown("<div class='dropdown-text'>and success will be evaluated by</div>", unsafe_allow_html=True)
+    if tool:
+        kpi = st.selectbox('', dynamic_logic_with_use_cases[goal]['kpis'], label_visibility='collapsed')
+    else:
+        st.warning("Please select a tool.")
+        return
+
+    # Close the horizontal layout for dropdowns
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Display use cases and partners based on selections
+    st.write(f"### Recommended Use Cases for {goal}:")
+    st.write(f"**Use Cases**: {', '.join(use_cases)}")
+
+    st.write(f"### Suitable Partners:")
+    st.write(f"**Partners**: {', '.join(partners)}")
+
+    # Contact information form
+    with st.form("contact_form"):
+        st.write("### Please provide your contact information to download the report")
+        name = st.text_input("Name")
+        email = st.text_input("Email")
+        company = st.text_input("Company")
+        phone = st.text_input("Phone Number")
+        submitted = st.form_submit_button("Submit")
+    if submitted:
+        if name and email and company and phone:
+            # Collect data
+            user_data = {
+                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'name': name,
+                'email': email,
+                'company': company,
+                'phone': phone,
+                'goal': goal,
+                'method': method,
+                'tool': tool,
+                'kpi': kpi,
+                'use_cases': ', '.join(use_cases),
+                'partners': ', '.join(partners)
+            }
+            # Save to Google Sheets
+            try:
+                add_data_to_google_sheet(user_data)
+                st.success("Your data has been saved.")
+            except Exception as e:
+                st.error(f"An error occurred while saving your data: {e}")
+                print(f"Error: {e}")
+            # Generate PDF
+            pdf_output = generate_pdf(goal, method, tool, kpi, use_cases, partners)
+            st.session_state.pdf_output = pdf_output
+            st.session_state.form_submitted = True
+            st.success("Your report is ready for download.")
+        else:
+            st.error("Please fill in all the contact information fields before downloading the report.")
+
+    # Display the download button if the form has been submitted
+    if st.session_state.form_submitted and st.session_state.pdf_output:
+        st.download_button(
+            label="Click here to download your report",
+            data=st.session_state.pdf_output,
+            file_name="strategy_report.pdf",
+            mime="application/pdf"
+        )
+
 
 # Maturity Assessment Module
 def maturity_assessment():
