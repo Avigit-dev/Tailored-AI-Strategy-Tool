@@ -198,6 +198,12 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
     c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))  # Set landscape orientation
     width, height = landscape(A4)  # Get dimensions for landscape
 
+    # Define logo dimensions and margins
+    logo_width = 157.5
+    logo_height = 60
+    logo_margin_right = 30
+    logo_margin_top = 20  # Defined here to use below when placing the logo
+
     # Add the cover page
     c.showPage()  # Start a new page for the cover
     # Add the background image to the top of the cover page
@@ -205,9 +211,6 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
     c.drawImage(background_image_path, 0, height - background_height, width=width, height=background_height, mask='auto')
 
     # Add the logo on the right side below the background image
-    logo_width = 157.5
-    logo_height = 60
-    logo_margin_right = 30
     logo_position_y = height - background_height - logo_height - 30
     c.drawImage(logo_path, width - logo_width - logo_margin_right, logo_position_y, width=logo_width, height=logo_height, mask='auto')
 
@@ -299,6 +302,7 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
     c.save()
     pdf_buffer.seek(0)
     return pdf_buffer
+
 # Strategy Tool Module
 def strategy_tool():
     # Load and display the background image
