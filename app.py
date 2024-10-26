@@ -11,6 +11,8 @@ from reportlab.lib import colors
 from datetime import datetime
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import matplotlib.pyplot as plt
+from reportlab.lib.units import inch
 
 # Add Sidebar Navigation
 st.sidebar.title("Navigation")
@@ -23,6 +25,8 @@ if 'pdf_output' not in st.session_state:
     st.session_state.pdf_output = None
 if 'assessment_submitted' not in st.session_state:
     st.session_state.assessment_submitted = False
+if 'assessment_pdf' not in st.session_state:
+    st.session_state.assessment_pdf = None
 
 # Load images
 @st.cache_resource
@@ -121,7 +125,7 @@ def add_assessment_data_to_google_sheet(user_data):
         st.error(f"An error occurred while saving your data: {e}")
         print(f"Error while saving data: {e}")
 
-# Updated generate_pdf function
+# Updated generate_pdf function for strategy report
 def generate_pdf(goal, method, tool, kpi, use_cases, partners):
     pdf_buffer = io.BytesIO()
     c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
@@ -183,6 +187,65 @@ def generate_pdf(goal, method, tool, kpi, use_cases, partners):
     y_position -= 20
     c.drawString(30, y_position, ', '.join(partners))
 
+    c.save()
+    pdf_buffer.seek(0)
+    return pdf_buffer
+
+# Generate PDF for Maturity Assessment report
+def generate_assessment_pdf(responses, user_info):
+    pdf_buffer = io.BytesIO()
+    c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
+    width, height = landscape(A4)
+
+    # Add the background image to the top of the page
+    background_height = height * 0.4
+    c.drawImage(background_image_path, 0, height - background_height, width=width, height=background_height, mask='auto')
+
+    # Add the logo in the top-right corner
+    logo_width = 157.5
+    logo_height = 60
+    c.drawImage(logo_path, width - logo_width - 30, height - background_height - logo_height - 10, width=logo_width, height=logo_height, mask='auto')
+
+    # Add the heading below the logo
+    c.setFont("Helvetica-Bold", 16)
+    c.setFillColor(colors.black)
+    c.drawString(30, height - background_height - logo_height - 40, "Maturity Assessment Report")
+
+    # Add user information
+    y_position = height - background_height - logo_height - 60
+    c.setFont("Helvetica", 12)
+    for key, value in user_info.items():
+        c.drawString(30, y_position, f"{key}: {value}")
+        y_position -= 20
+
+    # Add histograms for each topic
+    for topic in maturity_questions['topics']:
+        c.showPage()  # Start a new page for each topic
+        topic_name = topic['name']
+        topic_questions = topic['questions']
+        
+        # Generate the histogram plot
+        question_numbers = [q['id'] for q in topic_questions]
+        maturity_levels = [responses[q_id] for q_id in question_numbers]
+        
+        plt.figure(figsize=(8, 4))
+        plt.bar(question_numbers, maturity_levels, color='#E96C25')
+        plt.xlabel("Question Number")
+        plt.ylabel("Maturity Level")
+        plt.title(f"Maturity Levels for {topic_name}")
+        
+        # Save the plot to a temporary buffer and add it to the PDF
+        img_buffer = io.BytesIO()
+        plt.savefig(img_buffer, format='PNG')
+        plt.close()
+        
+        img_buffer.seek(0)
+        c.drawImage(img_buffer, inch, height / 2, width=width - 2 * inch, preserveAspectRatio=True, anchor='c')
+        
+        # Add the topic title
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(30, height - 60, f"Topic: {topic_name}")
+        
     c.save()
     pdf_buffer.seek(0)
     return pdf_buffer
@@ -361,9 +424,8 @@ def maturity_assessment():
                 st.header(topic['name'])
                 for question in topic['questions']:
                     q_id = question['id']
-                    # Ensure every radio button has a meaningful label for accessibility
                     response = st.radio(
-                        label=question['question'],  # Set the question text as the label
+                        label=question['question'],
                         options=[1, 2, 3, 4, 5],
                         format_func=lambda x: f"{x} - {scale[str(x)]}",
                         key=q_id,
@@ -376,7 +438,7 @@ def maturity_assessment():
         # Check if the assessment form has been submitted
         if submitted:
             # Collect user's contact information
-            st.write("### Please provide your contact information to view your results")
+            st.write("### Please provide your contact information to view your results and download the report")
             with st.form("assessment_contact_form"):
                 # Add labels to each input for accessibility and set label_visibility to "collapsed"
                 name = st.text_input("Name", label_visibility="collapsed")
@@ -405,15 +467,28 @@ def maturity_assessment():
                     except Exception as e:
                         st.error(f"An error occurred while saving your data: {e}")
                         print(f"Error: {e}")
-                    # Optionally display results or feedback
-                    st.write("Thank you for completing the assessment!")
+
+                    # Generate the PDF report
+                    pdf_output = generate_assessment_pdf(responses, {
+                        'Name': name,
+                        'Email': email,
+                        'Company': company,
+                        'Phone': phone
+                    })
+                    st.session_state.assessment_pdf = pdf_output  # Save PDF to session state
+                    st.success("Your report is ready for download!")
                 else:
                     st.error("Please fill in all the contact information fields.")
     else:
         st.write("Thank you for completing the assessment!")
-        # You can add code here to display results or further information
-
-
+        # Add download button for the report
+        if 'assessment_pdf' in st.session_state:
+            st.download_button(
+                label="Download Assessment Report",
+                data=st.session_state.assessment_pdf,
+                file_name="maturity_assessment_report.pdf",
+                mime="application/pdf"
+            )
 
 # Main application logic
 if app_mode == "Strategy Tool":
