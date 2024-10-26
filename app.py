@@ -467,6 +467,9 @@ def maturity_assessment():
 
                     # Save to Google Sheets
                     if add_assessment_data_to_google_sheet(user_data):
+                        # Define the y-axis range for the assessment report
+                        y_axis_range = (0, 5)  # Fixed range for maturity levels from 0 to 5
+
                         # Generate PDF report
                         pdf_output = generate_assessment_pdf(
                             st.session_state.responses,
@@ -475,7 +478,8 @@ def maturity_assessment():
                                 'Email': email,
                                 'Company': company,
                                 'Phone': phone
-                            }
+                            },
+                            y_axis_range  # Pass the y_axis_range as the third argument
                         )
                         st.session_state.assessment_pdf = pdf_output
                         st.session_state.assessment_submitted = True
@@ -494,6 +498,7 @@ def maturity_assessment():
             file_name="maturity_assessment_report.pdf",
             mime="application/pdf"
         )
+
 
 # Main application logic
 if app_mode == "Strategy Tool":
