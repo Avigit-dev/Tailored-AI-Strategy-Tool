@@ -246,9 +246,9 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
         # Add the topic title to the plot
         plt.title(f"Maturity Levels for {topic_name}")
 
-        # Add legend for each question
-        legend_labels = [q['question'] for q in topic_questions]
-        plt.legend(legend_labels, loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=2)
+        # Construct the legend with detailed question text
+        legend_labels = [f"{question_numbers[i]} - {topic_questions[i]['question']}" for i in range(len(topic_questions))]
+        plt.figtext(0.5, -0.15, "\n".join(legend_labels), wrap=True, horizontalalignment='center', fontsize=8)
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
             plt.savefig(tmp_file.name, format='PNG')
