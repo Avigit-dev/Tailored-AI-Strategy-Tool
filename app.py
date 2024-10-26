@@ -193,10 +193,10 @@ def generate_pdf(goal, method, tool, kpi, use_cases, partners):
     return pdf_buffer
 
 # Generate PDF functions for Strategy Tool and Maturity Assessment
-def generate_assessment_pdf(responses, user_info):
+def generate_assessment_pdf(responses, user_info, y_axis_range):
     pdf_buffer = io.BytesIO()
-    c = canvas.Canvas(pdf_buffer, pagesize=A4)
-    width, height = A4
+    c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))  # Set page layout to landscape
+    width, height = landscape(A4)
 
     # Add the background image to the top of the page
     background_height = height * 0.4
@@ -226,15 +226,16 @@ def generate_assessment_pdf(responses, user_info):
         topic_questions = topic['questions']
 
         # Generate the histogram plot
-        question_numbers = [q['question'] for q in topic_questions]
+        question_numbers = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5']  # Set fixed labels for X-axis
         maturity_levels = [responses[q['id']] for q in topic_questions]
 
         # Adjust figure size for A4 and reduce margins
-        plt.figure(figsize=(8, 4))
+        plt.figure(figsize=(10, 5))
         plt.subplots_adjust(left=0.2, right=0.8, bottom=0.2, top=0.8)
 
-        # Explicitly set y-axis ticks to show all maturity levels
-        plt.yticks(range(1, 6))
+        # Set y-axis range as per user input
+        plt.ylim(0, y_axis_range)
+        plt.yticks(range(0, y_axis_range + 1))
 
         plt.bar(question_numbers, maturity_levels, color='#E96C25')
         plt.xlabel("Question Number")
@@ -246,6 +247,10 @@ def generate_assessment_pdf(responses, user_info):
         # Add the topic title to the plot
         plt.title(f"Maturity Levels for {topic_name}")
 
+        # Add a legend below the plot for the questions
+        legend_text = "\n".join([f"{qn}: {q['question']}" for qn, q in zip(question_numbers, topic_questions)])
+        plt.figtext(0.5, 0.01, legend_text, wrap=True, horizontalalignment='center', fontsize=8)
+
         # Save the plot to a temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
             plt.savefig(tmp_file.name, format='PNG')
@@ -253,7 +258,7 @@ def generate_assessment_pdf(responses, user_info):
         plt.close()
 
         # Center the plot image on the PDF page
-        c.drawImage(tmp_file_path, width * 0.1, height / 2, width=width * 0.8, preserveAspectRatio=True, anchor='c')
+        c.drawImage(tmp_file_path, width * 0.1, height / 4, width=width * 0.8, preserveAspectRatio=True, anchor='c')
 
         # Remove the temporary file
         os.remove(tmp_file_path)
