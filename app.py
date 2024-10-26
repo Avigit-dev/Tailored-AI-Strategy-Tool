@@ -77,44 +77,52 @@ def get_tools_and_use_cases(goal: str, method: str) -> Tuple[List[str], List[str
 
 # Function to add data to Google Sheets for the Strategy Tool
 def add_data_to_google_sheet(user_data):
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    credentials = ServiceAccountCredentials.from_json_keyfile_dict(
-        st.secrets["google_service_account"], scope
-    )
-    client = gspread.authorize(credentials)
-    # Open your Google Sheet by name
-    sheet = client.open("client_inputs_strategytoolrnd").sheet1
+    try:
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+            st.secrets["google_service_account"], scope
+        )
+        client = gspread.authorize(credentials)
+        # Open your Google Sheet by name
+        sheet = client.open("client_inputs_strategytoolrnd").sheet1
 
-    # Check if the sheet is empty (no data)
-    if not sheet.get_all_values():
-        # Write headers
-        headers = list(user_data.keys())
-        sheet.append_row(headers)
+        # Check if the sheet is empty (no data)
+        if not sheet.get_all_values():
+            # Write headers
+            headers = list(user_data.keys())
+            sheet.append_row(headers)
 
-    # Append the data
-    sheet.append_row(list(user_data.values()))
+        # Append the data
+        sheet.append_row(list(user_data.values()))
+    except Exception as e:
+        st.error(f"An error occurred while saving your data: {e}")
+        print(f"Error while saving data: {e}")
 
 # Function to add data to Google Sheets for the Maturity Assessment
 def add_assessment_data_to_google_sheet(user_data):
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    credentials = ServiceAccountCredentials.from_json_keyfile_dict(
-        st.secrets["google_service_account"], scope
-    )
-    client = gspread.authorize(credentials)
-    # Open your Google Sheet by name and worksheet
-    sheet = client.open("Maturity_Assessment_Responses").worksheet("AssessmentData")
+    try:
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+            st.secrets["google_service_account"], scope
+        )
+        client = gspread.authorize(credentials)
+        # Open your Google Sheet by name and worksheet
+        sheet = client.open("Maturity_Assessment_Responses").worksheet("AssessmentData")
 
-    # Check if the sheet is empty (no data)
-    if not sheet.get_all_values():
-        # Write headers
-        headers = list(user_data.keys())
-        sheet.append_row(headers)
+        # Check if the sheet is empty (no data)
+        if not sheet.get_all_values():
+            # Write headers
+            headers = list(user_data.keys())
+            sheet.append_row(headers)
 
-    # Append the data
-    sheet.append_row(list(user_data.values()))
+        # Append the data
+        sheet.append_row(list(user_data.values()))
+    except Exception as e:
+        st.error(f"An error occurred while saving your data: {e}")
+        print(f"Error while saving data: {e}")
 
-# Function to generate PDF for the Strategy Tool
-def generate_pdf():
+# Updated generate_pdf function
+def generate_pdf(goal, method, tool, kpi, use_cases, partners):
     pdf_buffer = io.BytesIO()
     c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
     width, height = landscape(A4)
@@ -294,35 +302,36 @@ def strategy_tool():
         company = st.text_input("Company")
         phone = st.text_input("Phone Number")
         submitted = st.form_submit_button("Submit")
-        if submitted:
-            if name and email and company and phone:
-                # Collect data
-                user_data = {
-                    'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    'name': name,
-                    'email': email,
-                    'company': company,
-                    'phone': phone,
-                    'goal': goal,
-                    'method': method,
-                    'tool': tool,
-                    'kpi': kpi,
-                    'use_cases': ', '.join(use_cases),
-                    'partners': ', '.join(partners)
-                }
-                # Save to Google Sheets
-                try:
-                    add_data_to_google_sheet(user_data)
-                    st.success("Your data has been saved.")
-                except Exception as e:
-                    st.error(f"An error occurred while saving your data: {e}")
-                # Generate PDF
-                pdf_output = generate_pdf()
-                st.session_state.pdf_output = pdf_output
-                st.session_state.form_submitted = True
-                st.success("Your report is ready for download.")
-            else:
-                st.error("Please fill in all the contact information fields before downloading the report.")
+    if submitted:
+        if name and email and company and phone:
+            # Collect data
+            user_data = {
+                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'name': name,
+                'email': email,
+                'company': company,
+                'phone': phone,
+                'goal': goal,
+                'method': method,
+                'tool': tool,
+                'kpi': kpi,
+                'use_cases': ', '.join(use_cases),
+                'partners': ', '.join(partners)
+            }
+            # Save to Google Sheets
+            try:
+                add_data_to_google_sheet(user_data)
+                st.success("Your data has been saved.")
+            except Exception as e:
+                st.error(f"An error occurred while saving your data: {e}")
+                print(f"Error: {e}")
+            # Generate PDF
+            pdf_output = generate_pdf(goal, method, tool, kpi, use_cases, partners)
+            st.session_state.pdf_output = pdf_output
+            st.session_state.form_submitted = True
+            st.success("Your report is ready for download.")
+        else:
+            st.error("Please fill in all the contact information fields before downloading the report.")
 
     # Display the download button if the form has been submitted
     if st.session_state.form_submitted and st.session_state.pdf_output:
@@ -344,30 +353,31 @@ def maturity_assessment():
     scale = maturity_questions['scale']
     responses = {}
 
-    with st.form("assessment_form"):
-        for topic in maturity_questions['topics']:
-            st.header(topic['name'])
-            for question in topic['questions']:
-                q_id = question['id']
-                response = st.radio(
-                    question['question'],
-                    options=[1, 2, 3, 4, 5],
-                    format_func=lambda x: f"{x} - {scale[str(x)]}",
-                    key=q_id
-                )
-                responses[q_id] = response
+    if not st.session_state.get('assessment_submitted', False):
+        with st.form("assessment_form"):
+            for topic in maturity_questions['topics']:
+                st.header(topic['name'])
+                for question in topic['questions']:
+                    q_id = question['id']
+                    response = st.radio(
+                        question['question'],
+                        options=[1, 2, 3, 4, 5],
+                        format_func=lambda x: f"{x} - {scale[str(x)]}",
+                        key=q_id
+                    )
+                    responses[q_id] = response
 
-        submitted = st.form_submit_button("Submit Assessment")
+            submitted = st.form_submit_button("Submit Assessment")
 
-    if submitted and not st.session_state.assessment_submitted:
-        # Collect user's contact information
-        with st.form("assessment_contact_form"):
+        if submitted:
+            # Collect user's contact information
             st.write("### Please provide your contact information to view your results")
-            name = st.text_input("Name")
-            email = st.text_input("Email")
-            company = st.text_input("Company")
-            phone = st.text_input("Phone Number")
-            contact_submitted = st.form_submit_button("Submit")
+            with st.form("assessment_contact_form"):
+                name = st.text_input("Name")
+                email = st.text_input("Email")
+                company = st.text_input("Company")
+                phone = st.text_input("Phone Number")
+                contact_submitted = st.form_submit_button("Submit")
 
             if contact_submitted:
                 if name and email and company and phone:
@@ -387,12 +397,14 @@ def maturity_assessment():
                         st.session_state.assessment_submitted = True
                     except Exception as e:
                         st.error(f"An error occurred while saving your data: {e}")
+                        print(f"Error: {e}")
                     # Optionally display results or feedback
                     st.write("Thank you for completing the assessment!")
                 else:
                     st.error("Please fill in all the contact information fields.")
-    elif st.session_state.assessment_submitted:
+    else:
         st.write("Thank you for completing the assessment!")
+        # You can add code here to display results or further information
 
 # Main application logic
 if app_mode == "Strategy Tool":
