@@ -1,0 +1,167 @@
+{
+  "scale": {
+    "1": "Not at all / No Progress",
+    "2": "To a small extent / Minimal Progress",
+    "3": "To a moderate extent / Moderate Progress",
+    "4": "To a great extent / Significant Progress",
+    "5": "Fully achieved / Optimized"
+  },
+  "topics": [
+    {
+      "name": "ERP Harmonization",
+      "abbreviation": "ERP Harmonization",
+      "questions": [
+        {
+          "id": "ERP Harmonization Q1",
+          "question": "To what extent has your organization unified its ERP systems across all departments and regions?"
+        },
+        {
+          "id": "ERP Harmonization Q2",
+          "question": "How consistent and standardized is the data within your ERP systems?"
+        },
+        {
+          "id": "ERP Harmonization Q3",
+          "question": "What is the level of adoption of a global ERP template throughout the organization?"
+        },
+        {
+          "id": "ERP Harmonization Q4",
+          "question": "How effectively has your organization reduced unnecessary customizations in ERP systems?"
+        },
+        {
+          "id": "ERP Harmonization Q5",
+          "question": "To what extent is there a governance framework in place for ERP harmonization initiatives?"
+        }
+      ]
+    },
+    {
+      "name": "Standardization of Processes",
+      "abbreviation": "Standardization of Processes",
+      "questions": [
+        {
+          "id": "Standardization of Processes Q1",
+          "question": "How comprehensively are business processes documented and standardized across the organization?"
+        },
+        {
+          "id": "Standardization of Processes Q2",
+          "question": "What is the level of adherence to Standard Operating Procedures (SOPs) in daily operations?"
+        },
+        {
+          "id": "Standardization of Processes Q3",
+          "question": "How effectively does your organization train employees on standardized processes?"
+        },
+        {
+          "id": "Standardization of Processes Q4",
+          "question": "To what extent are standardized processes reviewed and improved regularly?"
+        },
+        {
+          "id": "Standardization of Processes Q5",
+          "question": "How extensively are standardized processes automated using technology solutions?"
+        }
+      ]
+    },
+    {
+      "name": "Integration Across Departments and Regions",
+      "abbreviation": "Integration Across Departments and Regions",
+      "questions": [
+        {
+          "id": "Integration Across Departments and Regions Q1",
+          "question": "How effectively do departments collaborate through integrated systems?"
+        },
+        {
+          "id": "Integration Across Departments and Regions Q2",
+          "question": "To what degree are regional operations aligned with corporate processes and systems?"
+        },
+        {
+          "id": "Integration Across Departments and Regions Q3",
+          "question": "How seamless is the sharing of information across departments and regions?"
+        },
+        {
+          "id": "Integration Across Departments and Regions Q4",
+          "question": "What is the level of usage of integrated communication and collaboration tools?"
+        },
+        {
+          "id": "Integration Across Departments and Regions Q5",
+          "question": "To what extent does your organization have unified reporting mechanisms across all units?"
+        }
+      ]
+    },
+    {
+      "name": "Optimization of Capex",
+      "abbreviation": "Optimization of Capex",
+      "questions": [
+        {
+          "id": "Optimization of Capex Q1",
+          "question": "How mature are your processes for planning capital expenditures?"
+        },
+        {
+          "id": "Optimization of Capex Q2",
+          "question": "To what extent does your organization prioritize Capex investments based on strategic objectives?"
+        },
+        {
+          "id": "Optimization of Capex Q3",
+          "question": "How rigorously is Return on Investment (ROI) analyzed before approving Capex projects?"
+        },
+        {
+          "id": "Optimization of Capex Q4",
+          "question": "How effectively does your organization manage the lifecycle of capital assets?"
+        },
+        {
+          "id": "Optimization of Capex Q5",
+          "question": "To what degree are Capex budgets monitored and controlled to prevent overruns?"
+        }
+      ]
+    },
+    {
+      "name": "Improvement of Opex",
+      "abbreviation": "Improvement of Opex",
+      "questions": [
+        {
+          "id": "Improvement of Opex Q1",
+          "question": "How accurately does your organization track operational expenses?"
+        },
+        {
+          "id": "Improvement of Opex Q2",
+          "question": "To what extent are there active initiatives to reduce operational costs?"
+        },
+        {
+          "id": "Improvement of Opex Q3",
+          "question": "How effectively are efficiency measures implemented to optimize Opex?"
+        },
+        {
+          "id": "Improvement of Opex Q4",
+          "question": "How mature are your processes for managing vendors to optimize operational costs?"
+        },
+        {
+          "id": "Improvement of Opex Q5",
+          "question": "To what degree does your organization benchmark Opex against industry standards?"
+        }
+      ]
+    },
+    {
+      "name": "KPI Monitoring and Management",
+      "abbreviation": "KPI Monitoring and Management",
+      "questions": [
+        {
+          "id": "KPI Monitoring and Management Q1",
+          "question": "How comprehensively has your organization defined KPIs related to ERP efficiency?"
+        },
+        {
+          "id": "KPI Monitoring and Management Q2",
+          "question": "To what extent are KPIs monitored in real time?"
+        },
+        {
+          "id": "KPI Monitoring and Management Q3",
+          "question": "How effectively does your organization use KPI data to inform decisions?"
+        },
+        {
+          "id": "KPI Monitoring and Management Q4",
+          "question": "How advanced are the tools used for KPI reporting and visualization?"
+        },
+        {
+          "id": "KPI Monitoring and Management Q5",
+          "question": "To what degree are KPIs used to drive continuous improvement initiatives?"
+        }
+      ]
+    }
+  ]
+}
