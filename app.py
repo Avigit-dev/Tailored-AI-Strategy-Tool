@@ -192,7 +192,8 @@ def generate_pdf(goal, method, tool, kpi, use_cases, partners):
     pdf_buffer.seek(0)
     return pdf_buffer
 
-# Generate PDF functions for Strategy Tool and Maturity Assessment
+
+# Generate PDF functions for Maturity Assessment
 def generate_assessment_pdf(responses, user_info, y_axis_range):
     pdf_buffer = io.BytesIO()
     c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))  # Set landscape orientation
@@ -204,8 +205,7 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
     logo_margin_right = 30
     logo_margin_top = 20  # Defined here to use below when placing the logo
 
-    # Add the cover page
-    c.showPage()  # Start a new page for the cover
+    # Add the cover page directly without calling c.showPage()
     # Add the background image to the top of the cover page
     background_height = height * 0.4
     c.drawImage(background_image_path, 0, height - background_height, width=width, height=background_height, mask='auto')
@@ -302,6 +302,7 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
     c.save()
     pdf_buffer.seek(0)
     return pdf_buffer
+
 
 # Strategy Tool Module
 def strategy_tool():
