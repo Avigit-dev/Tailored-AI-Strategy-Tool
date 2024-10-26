@@ -253,7 +253,7 @@ def generate_assessment_pdf(responses, user_info):
         plt.close()
 
         # Center the plot image on the PDF page
-        c.drawCentredImage(width / 2, height / 2, width=width * 0.8, file=tmp_file_path, preserveAspectRatio=True)
+        c.drawImage(tmp_file_path, width * 0.1, height / 2, width=width * 0.8, preserveAspectRatio=True, anchor='c')
 
         # Remove the temporary file
         os.remove(tmp_file_path)
