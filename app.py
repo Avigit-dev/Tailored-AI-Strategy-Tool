@@ -219,49 +219,41 @@ def generate_assessment_pdf(responses, user_info):
         c.drawString(30, y_position, f"{key}: {value}")
         y_position -= 20
 
-    # Preparing to add multiple histograms on a single page
-    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-    import matplotlib.pyplot as plt
-    
-    # Define grid layout for histograms
-    rows, cols = 2, 2  # 2x2 grid
-    fig, axs = plt.subplots(rows, cols, figsize=(11, 8))
-    fig.suptitle("Assessment Histograms")
-
-    # Loop over topics and generate histograms
-    for idx, topic in enumerate(maturity_questions['topics']):
-        row, col = divmod(idx, cols)
-        ax = axs[row, col]
+    # Add histograms for each topic
+    for topic in maturity_questions['topics']:
+        c.showPage()  # Start a new page for each topic
         topic_name = topic['name']
         topic_questions = topic['questions']
-
-        # Extract question numbers and maturity levels
+        
+        # Generate the histogram plot
         question_numbers = [q['id'] for q in topic_questions]
         maturity_levels = [responses[q_id] for q_id in question_numbers]
+        
+        plt.figure(figsize=(8, 4))
+        plt.bar(question_numbers, maturity_levels, color='#E96C25')
+        plt.xlabel("Question Number")
+        plt.ylabel("Maturity Level")
+        plt.title(f"Maturity Levels for {topic_name}")
+        
+        # Save the plot to a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
+            plt.savefig(tmp_file.name, format='PNG')
+            tmp_file_path = tmp_file.name
+        plt.close()
+        
+        # Add the plot image to the PDF
+        c.drawImage(tmp_file_path, inch, height / 2, width=width - 2 * inch, preserveAspectRatio=True, anchor='c')
+        
+        # Remove the temporary file
+        os.remove(tmp_file_path)
 
-        # Generate histogram
-        ax.bar(question_numbers, maturity_levels, color="skyblue")
-        ax.set_title(topic_name, fontsize=8)
-        ax.tick_params(axis="x", labelsize=6)
-        ax.tick_params(axis="y", labelsize=6)
-        ax.set_xlabel("Question ID", fontsize=7)
-        ax.set_ylabel("Maturity Level", fontsize=7)
-
-    # Adjust layout and save to canvas
-    fig.tight_layout(rect=[0, 0.03, 1, 0.95])
-    canvas = FigureCanvas(fig)
-    canvas.draw()
-
-    # Convert to image and embed in the PDF
-    image = Image.frombytes('RGB', canvas.get_width_height(), canvas.tostring_rgb())
-    image_path = tempfile.mktemp(".png")
-    image.save(image_path)
-    c.drawImage(image_path, 0, 0, width=width, height=height * 0.6, mask='auto')
-    c.showPage()
-
+        # Add the topic title
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(30, height - 60, f"Topic: {topic_name}")
+        
     c.save()
     pdf_buffer.seek(0)
-    return pdf_buffer.getvalue()
+    return pdf_buffer
 
 # Strategy Tool Module
 def strategy_tool():
