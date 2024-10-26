@@ -195,8 +195,8 @@ def generate_pdf(goal, method, tool, kpi, use_cases, partners):
 # Generate PDF functions for Strategy Tool and Maturity Assessment
 def generate_assessment_pdf(responses, user_info):
     pdf_buffer = io.BytesIO()
-    c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
-    width, height = landscape(A4)
+    c = canvas.Canvas(pdf_buffer, pagesize=A4)
+    width, height = A4
 
     # Add the background image to the top of the page
     background_height = height * 0.4
@@ -212,35 +212,39 @@ def generate_assessment_pdf(responses, user_info):
     c.setFillColor(colors.black)
     c.drawString(30, height - background_height - logo_height - 40, "Maturity Assessment Report")
 
-   # Add user information
+    # Add user information
     y_position = height - background_height - logo_height - 60
-    c.setFont("Helvetica", 10)  # Decreased font size for user info
+    c.setFont("Helvetica", 12)
     for key, value in user_info.items():
         c.drawString(30, y_position, f"{key}: {value}")
-        y_position -= 15  # Reduced spacing for user info
+        y_position -= 20
 
-    # --- Changes for histogram layout ---
-    c.showPage()  # Start a new page for histograms
-    num_topics = len(maturity_questions['topics'])
-    plot_width = (width - 2 * inch) / num_topics  # Adjust width based on number of topics
-    plot_height = height / 2.5  # Reduced height for fitting on one page
-    x_positions = [inch + i * plot_width for i in range(num_topics)]  # Calculate x positions
-
-    for i, topic in enumerate(maturity_questions['topics']):
+    # Add histograms for each topic
+    for topic in maturity_questions['topics']:
+        c.showPage()  # Start a new page for each topic
         topic_name = topic['name']
         topic_questions = topic['questions']
 
-        # Generate the histogram plot with adjusted size
-        question_numbers = [q['id'] for q in topic_questions]
-        maturity_levels = [responses[q_id] for q_id in question_numbers]
+        # Generate the histogram plot
+        question_numbers = [q['question'] for q in topic_questions]
+        maturity_levels = [responses[q['id']] for q in topic_questions]
 
-        plt.figure(figsize=(plot_width / inch, plot_height / inch))  # Adjust figsize
+        # Adjust figure size for A4 and reduce margins
+        plt.figure(figsize=(8, 4))
+        plt.subplots_adjust(left=0.2, right=0.8, bottom=0.2, top=0.8)
+
+        # Explicitly set y-axis ticks to show all maturity levels
+        plt.yticks(range(1, 6))
+
         plt.bar(question_numbers, maturity_levels, color='#E96C25')
-        plt.xlabel("Question Number", fontsize=8)  # Reduced font size
-        plt.ylabel("Maturity Level", fontsize=8)  # Reduced font size
-        plt.title(f"Maturity Levels for {topic_name}", fontsize=10)  # Reduced font size
-        plt.xticks(fontsize=8)  # Reduced font size for x-axis ticks
-        plt.yticks(fontsize=8)  # Reduced font size for y-axis ticks
+        plt.xlabel("Question Number")
+        plt.ylabel("Maturity Level")
+
+        # Rotate x-axis labels for better readability
+        plt.xticks(rotation=45, ha="right")
+
+        # Add the topic title to the plot
+        plt.title(f"Maturity Levels for {topic_name}")
 
         # Save the plot to a temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
@@ -248,12 +252,12 @@ def generate_assessment_pdf(responses, user_info):
             tmp_file_path = tmp_file.name
         plt.close()
 
-        # Add the plot image to the PDF at calculated position
-        c.drawImage(tmp_file_path, x_positions[i], height / 2 - plot_height / 2, width=plot_width, height=plot_height, preserveAspectRatio=True)
+        # Center the plot image on the PDF page
+        c.drawCentredImage(width / 2, height / 2, width=width * 0.8, file=tmp_file_path, preserveAspectRatio=True)
 
         # Remove the temporary file
         os.remove(tmp_file_path)
-        
+
     c.save()
     pdf_buffer.seek(0)
     return pdf_buffer
