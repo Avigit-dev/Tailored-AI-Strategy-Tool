@@ -366,7 +366,8 @@ def maturity_assessment():
                         label=question['question'],  # Set the question text as the label
                         options=[1, 2, 3, 4, 5],
                         format_func=lambda x: f"{x} - {scale[str(x)]}",
-                        key=q_id
+                        key=q_id,
+                        label_visibility="collapsed"  # Use "collapsed" to hide label text if already displayed
                     )
                     responses[q_id] = response
 
@@ -377,11 +378,11 @@ def maturity_assessment():
             # Collect user's contact information
             st.write("### Please provide your contact information to view your results")
             with st.form("assessment_contact_form"):
-                # Add labels to each input for accessibility
-                name = st.text_input("Name")
-                email = st.text_input("Email")
-                company = st.text_input("Company")
-                phone = st.text_input("Phone Number")
+                # Add labels to each input for accessibility and set label_visibility to "collapsed"
+                name = st.text_input("Name", label_visibility="collapsed")
+                email = st.text_input("Email", label_visibility="collapsed")
+                company = st.text_input("Company", label_visibility="collapsed")
+                phone = st.text_input("Phone Number", label_visibility="collapsed")
                 contact_submitted = st.form_submit_button(label="Submit Contact Info")  # Add explicit label
 
             # Check if the contact information form has been submitted
