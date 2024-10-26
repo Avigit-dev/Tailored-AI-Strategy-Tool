@@ -198,26 +198,11 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
     c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))  # Set landscape orientation
     width, height = landscape(A4)  # Get dimensions for landscape
 
-    # Add the background image to the top of the page
-    background_height = height * 0.4
-    c.drawImage(background_image_path, 0, height - background_height, width=width, height=background_height, mask='auto')
-
-    # Add the logo in the top-right corner
+    # Add the EFESO logo to the top-right corner of every page
     logo_width = 157.5
     logo_height = 60
-    c.drawImage(logo_path, width - logo_width - 30, height - background_height - logo_height - 10, width=logo_width, height=logo_height, mask='auto')
-
-    # Add the heading below the logo
-    c.setFont("Helvetica-Bold", 16)
-    c.setFillColor(colors.black)
-    c.drawString(30, height - background_height - logo_height - 40, "Maturity Assessment Report")
-
-    # Add user information
-    y_position = height - background_height - logo_height - 60
-    c.setFont("Helvetica", 12)
-    for key, value in user_info.items():
-        c.drawString(30, y_position, f"{key}: {value}")
-        y_position -= 20
+    logo_margin_right = 30
+    logo_margin_top = 20
 
     # Add histograms for each topic
     for topic in maturity_questions['topics']:
@@ -225,11 +210,16 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
         topic_name = topic['name']
         topic_questions = topic['questions']
 
+        # Draw the logo at the top-right corner of each page
+        c.drawImage(logo_path, width - logo_width - logo_margin_right, height - logo_height - logo_margin_top, 
+                    width=logo_width, height=logo_height, mask='auto')
+
         # Define question numbers and maturity levels based on the responses
         question_numbers = [f"Q{i+1}" for i in range(len(topic_questions))]
         maturity_levels = [responses[q['id']] for q in topic_questions]
 
-        plt.figure(figsize=(8, 4))
+        # Set up the user session plot
+        plt.figure(figsize=(4, 4))
         plt.subplots_adjust(left=0.2, right=0.8, bottom=0.2, top=0.8)
 
         # Set y-axis ticks with user-defined range
@@ -239,34 +229,46 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
         plt.bar(question_numbers, maturity_levels, color='#E96C25')
         plt.xlabel("Question Number")
         plt.ylabel("Maturity Level")
+        plt.title(f"User Session Data - {topic_name}")
 
-        # Set x-axis labels
-        plt.xticks(rotation=45, ha="right")
-
-        # Add the topic title to the plot
-        plt.title(f"Maturity Levels for {topic_name}")
-
+        # Save the user session plot to a temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
             plt.savefig(tmp_file.name, format='PNG')
-            tmp_file_path = tmp_file.name
+            user_plot_path = tmp_file.name
         plt.close()
 
-        # Center the plot image (both horizontally and vertically)
-        image_height = width * 0.8 * (height / width)
-        y_coordinate = (height - image_height) / 2
-        c.drawImage(tmp_file_path, width * 0.1, y_coordinate, width=width * 0.8, preserveAspectRatio=True, anchor='c')
+        # Adjust the y-coordinate for the plot to move it up by a couple of centimeters
+        plot_margin_top = 80  # Adjusted to move plots upwards by approximately 2 cm
+        plot_height = height * 0.5  # Adjust plot height to fit within the left half
+        plot_width = width * 0.45   # Adjust plot width to fit in half of the page
 
-        os.remove(tmp_file_path)
+        # Draw the user session plot on the left half of the page
+        c.drawImage(user_plot_path, 30, height - plot_margin_top - plot_height, 
+                    width=plot_width, height=plot_height, preserveAspectRatio=True, mask='auto')
 
-        # Add the legend below the plot
+        # Remove the temporary file for the plot
+        os.remove(user_plot_path)
+
+        # Placeholder for the right half of the page
+        placeholder_x = width / 2 + 30
+        placeholder_y = height - plot_margin_top - plot_height
+        c.setFillColor(colors.lightgrey)
+        c.rect(placeholder_x, placeholder_y, plot_width, plot_height, fill=1)
+        c.setFillColor(colors.black)
+        c.setFont("Helvetica", 12)
+        c.drawString(placeholder_x + 10, placeholder_y + plot_height - 20, "Placeholder for Historical Data")
+
+        # Add the legend below the plots, spreading across the page
         legend_labels = [f"{question_numbers[i]} - {topic_questions[i]['question']}" for i in range(len(topic_questions))]
         legend_text = "\n".join(legend_labels)
 
-        # Adjust y_position to place the legend just below the plot
-        legend_y_position = y_coordinate - 20
+        # Adjust y_position to place the legend just below the plots
+        legend_y_position = height - plot_margin_top - plot_height - 40
         c.setFont("Helvetica", 10)
         c.setFillColor(colors.black)
         for line in legend_text.split("\n"):
+            if legend_y_position < 50:  # Ensure the legend fits within the page
+                break
             c.drawString(30, legend_y_position, line)
             legend_y_position -= 15
 
