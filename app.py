@@ -213,44 +213,53 @@ def generate_assessment_pdf(responses, user_info):
     c.drawString(30, height - background_height - logo_height - 40, "Maturity Assessment Report")
 
     # Add user information
-    y_position = height - background_height - logo_height - 60
-    c.setFont("Helvetica", 12)
+    y_position = height - background_height - logo_height - 80
+    c.setFont("Helvetica", 10)
     for key, value in user_info.items():
         c.drawString(30, y_position, f"{key}: {value}")
-        y_position -= 20
+        y_position -= 15
 
-    # Add histograms for each topic
-    for topic in maturity_questions['topics']:
-        c.showPage()  # Start a new page for each topic
+    # Calculate layout for histograms
+    num_topics = len(maturity_questions['topics'])
+    plot_width = (width - 3 * inch) / 2  # Two columns
+    plot_height = (height - y_position - inch) / ((num_topics + 1) // 2)  # Two rows
+
+    # Create histograms for each topic
+    plt.style.use('seaborn')
+    for idx, topic in enumerate(maturity_questions['topics']):
         topic_name = topic['name']
         topic_questions = topic['questions']
         
+        # Calculate position for this plot
+        row = idx // 2
+        col = idx % 2
+        x_pos = inch + col * (plot_width + 0.5 * inch)
+        y_pos = y_position - (row + 1) * (plot_height + 0.2 * inch)
+
         # Generate the histogram plot
+        plt.figure(figsize=(6, 3))
         question_numbers = [q['id'] for q in topic_questions]
         maturity_levels = [responses[q_id] for q_id in question_numbers]
         
-        plt.figure(figsize=(8, 4))
         plt.bar(question_numbers, maturity_levels, color='#E96C25')
-        plt.xlabel("Question Number")
-        plt.ylabel("Maturity Level")
-        plt.title(f"Maturity Levels for {topic_name}")
+        plt.xlabel("Question Number", fontsize=8)
+        plt.ylabel("Maturity Level", fontsize=8)
+        plt.title(f"{topic_name}", fontsize=10)
+        plt.tick_params(axis='both', which='major', labelsize=8)
+        plt.ylim(0, 5.5)
         
         # Save the plot to a temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
-            plt.savefig(tmp_file.name, format='PNG')
+            plt.savefig(tmp_file.name, format='PNG', bbox_inches='tight', dpi=300)
             tmp_file_path = tmp_file.name
         plt.close()
         
         # Add the plot image to the PDF
-        c.drawImage(tmp_file_path, inch, height / 2, width=width - 2 * inch, preserveAspectRatio=True, anchor='c')
+        c.drawImage(tmp_file_path, x_pos, y_pos, width=plot_width, height=plot_height)
         
         # Remove the temporary file
         os.remove(tmp_file_path)
 
-        # Add the topic title
-        c.setFont("Helvetica-Bold", 14)
-        c.drawString(30, height - 60, f"Topic: {topic_name}")
-        
     c.save()
     pdf_buffer.seek(0)
     return pdf_buffer
