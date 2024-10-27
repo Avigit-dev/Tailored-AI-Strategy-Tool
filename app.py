@@ -319,6 +319,34 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
 
 
 # New helper functions for maturity assessment
+def generate_report_and_save():
+    # Generate PDF report only for completed topics
+    pdf_output = generate_assessment_pdf(
+        st.session_state.responses,
+        st.session_state.user_info,
+        (0, 5)
+    )
+
+    # Ensure we have a valid PDF output
+    if pdf_output is None:
+        st.error("Failed to generate the PDF report.")
+        return
+
+    # Save to Google Sheets
+    user_data = {
+        'Timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        **st.session_state.user_info,
+        **st.session_state.responses
+    }
+
+    if add_assessment_data_to_google_sheet(user_data):
+        st.session_state.assessment_pdf = pdf_output  # Store the entire buffer
+        st.session_state.assessment_submitted = True
+        st.success("Assessment completed! You can now download your report.")
+        st.experimental_rerun()  # Refresh to show the download button
+    else:
+        st.error("Failed to save assessment data.")
+
 def create_topic_tile(topic_name: str, description: str):
     # Create a clickable tile with consistent styling and fixed height
     tile_style = f"""
@@ -437,16 +465,47 @@ def display_topic_assessment(topic_name: str):
         st.error(f"No questions found for topic: {topic_name}")
         return
     
-    # Display user information form if not already filled
-    if not st.session_state.user_info:
+    # Display assessment questions
+    with st.form(key=f"assessment_form_{topic_name}"):
+        st.write("### Assessment Questions")
+        for question in topic_questions['questions']:
+            q_id = question['id']
+            st.write(question['question'])
+            response = st.radio(
+                f"Select maturity level for question {q_id}",
+                options=[1, 2, 3, 4, 5],
+                format_func=lambda x: f"{x} - {maturity_questions['scale'][str(x)]}",
+                key=f"q_{q_id}"
+            )
+            st.session_state.responses[q_id] = response
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.form_submit_button("Submit and Continue to Other Topics"):
+                st.session_state.completed_topics.add(topic_name)
+                st.session_state.current_page = 'topic_selection'
+                st.experimental_rerun()
+        with col2:
+            if st.form_submit_button("Submit and Generate Final Report"):
+                st.session_state.completed_topics.add(topic_name)
+                generate_final_report()
+
+
+def generate_final_report():
+    if not st.session_state.completed_topics:
+        st.error("Please complete at least one topic assessment before generating the report.")
+        return
+
+    # Check if user info is collected
+    if not st.session_state.get('user_info'):
         with st.form("user_info_form"):
-            st.write("### Please fill in your contact information")
+            st.write("### Please fill in your contact information to download the report")
             name = st.text_input("Full Name")
             email = st.text_input("Email Address")
             company = st.text_input("Company Name")
             phone = st.text_input("Phone Number")
             
-            if st.form_submit_button("Continue to Assessment"):
+            if st.form_submit_button("Submit"):
                 if all([name, email, company, phone]):
                     st.session_state.user_info = {
                         'Name': name,
@@ -454,68 +513,15 @@ def display_topic_assessment(topic_name: str):
                         'Company': company,
                         'Phone': phone
                     }
-                    st.rerun()
+                    st.success("Your information has been submitted.")
+                    # Proceed to generate the report
+                    generate_report_and_save()
                 else:
                     st.error("Please fill in all fields.")
     else:
-        # Display assessment questions
-        with st.form(key=f"assessment_form_{topic_name}"):
-            st.write("### Assessment Questions")
-            for question in topic_questions['questions']:
-                q_id = question['id']
-                st.write(question['question'])
-                response = st.radio(
-                    f"Select maturity level for question {q_id}",
-                    options=[1, 2, 3, 4, 5],
-                    format_func=lambda x: f"{x} - {maturity_questions['scale'][str(x)]}",
-                    key=f"q_{q_id}"
-                )
-                st.session_state.responses[q_id] = response
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.form_submit_button("Submit and Continue to Other Topics"):
-                    st.session_state.completed_topics.add(topic_name)
-                    st.session_state.current_page = 'topic_selection'
-                    st.rerun()
-            with col2:
-                if st.form_submit_button("Submit and Generate Final Report"):
-                    st.session_state.completed_topics.add(topic_name)
-                    generate_final_report()
+        # User info is already collected
+        generate_report_and_save()
 
-def generate_final_report():
-    if not st.session_state.completed_topics:
-        st.error("Please complete at least one topic assessment before generating the report.")
-        return
-
-    # Generate PDF report only for completed topics
-    pdf_output = generate_assessment_pdf(
-        st.session_state.responses,
-        st.session_state.user_info,
-        (0, 5)
-    )
-
-    # Ensure we have a valid PDF output
-    if pdf_output is None:
-        st.error("Failed to generate the PDF report.")
-        return
-
-     # Debugging statement to confirm PDF generation
-    st.write("PDF successfully generated, ready for download.")  # <-- Add this line here
-
-    # Save to Google Sheets
-    user_data = {
-        'Timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        **st.session_state.user_info,
-        **st.session_state.responses
-    }
-
-    if add_assessment_data_to_google_sheet(user_data):
-        st.session_state.assessment_pdf = pdf_output  # Store the entire buffer, not just the byte value
-        st.session_state.assessment_submitted = True
-        st.success("Assessment completed! You can now download your report.")
-    else:
-        st.error("Failed to save assessment data.")
 
 
 # Strategy Tool Module
@@ -683,7 +689,6 @@ def maturity_assessment():
     # Handle different pages in the assessment flow
     if st.session_state.current_page == 'topic_selection':
         display_topic_tiles()
-        display_topic_dialog()
         
         # Show option to generate final report if any topics completed
         if st.session_state.completed_topics:
@@ -699,10 +704,10 @@ def maturity_assessment():
         # Add back button
         if st.button("Back to Topics"):
             st.session_state.current_page = 'topic_selection'
-            st.rerun()
+            st.experimental_rerun()
     
     # Move the download button code here to display it at the bottom
-    if st.session_state.assessment_submitted:
+    if st.session_state.get('assessment_submitted'):
         pdf_output = st.session_state.assessment_pdf  # Use the stored PDF output
         if pdf_output:
             st.download_button(
