@@ -213,9 +213,9 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
     logo_width = 157.5
     logo_height = 60
     logo_margin_right = 30
-    logo_margin_top = 20  # Defined here to use below when placing the logo
+    logo_margin_top = 20
 
-    # Add the cover page directly without calling c.showPage()
+    # Add the cover page without calling c.showPage()
     # Add the background image to the top of the cover page
     background_height = height * 0.4
     c.drawImage(background_image_path, 0, height - background_height, width=width, height=background_height, mask='auto')
@@ -236,14 +236,18 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
         c.drawString(30, y_position, f"{key}: {value}")
         y_position -= 20
 
-    # Generate pages for each topic
-    for topic in maturity_questions['topics']:
-        c.showPage()
-        topic_name = topic['name']
+    # Generate pages for each completed topic
+    for topic_name in st.session_state.completed_topics:
+        # Find the topic details
+        topic = next((t for t in maturity_questions['topics'] if t['name'] == topic_name), None)
+        if not topic:
+            continue  # Skip if topic not found
+
+        c.showPage()  # Start a new page
         topic_questions = topic['questions']
 
         # Add the logo at the top-right corner of each page
-        c.drawImage(logo_path, width - logo_width - logo_margin_right, height - logo_height - logo_margin_top, 
+        c.drawImage(logo_path, width - logo_width - logo_margin_right, height - logo_height - logo_margin_top,
                     width=logo_width, height=logo_height, mask='auto')
 
         # Add the topic name as the page title
@@ -257,7 +261,7 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
 
         # Set up the user session plot
         plt.figure(figsize=(4, 4))
-        plt.subplots_adjust(left=0.2, right=0.8, bottom=0.3, top=0.8)  # Adjusted to make more space for the title
+        plt.subplots_adjust(left=0.2, right=0.8, bottom=0.3, top=0.8)
 
         # Set y-axis ticks with user-defined range
         plt.yticks(range(y_axis_range[0], y_axis_range[1] + 1))
@@ -266,7 +270,7 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
         plt.bar(question_numbers, maturity_levels, color='#E96C25')
         plt.xlabel("Question Number")
         plt.ylabel("Maturity Level")
-        plt.title(f"User Session Data - {topic_name}", fontsize=10, pad=20)  # Adjusted title size and padding
+        plt.title(f"User Session Data - {topic_name}", fontsize=10, pad=20)
 
         # Save the user session plot to a temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
@@ -274,13 +278,13 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
             user_plot_path = tmp_file.name
         plt.close()
 
-        # Adjust the y-coordinate for the plot to move it up by a couple of centimeters
-        plot_margin_top = 100  # Adjusted to move plots upwards
-        plot_height = height * 0.5  # Adjust plot height to fit within the left half
-        plot_width = width * 0.45   # Adjust plot width to fit in half of the page
+        # Adjust the y-coordinate for the plot
+        plot_margin_top = 100
+        plot_height = height * 0.5
+        plot_width = width * 0.45
 
         # Draw the user session plot on the left half of the page
-        c.drawImage(user_plot_path, 30, height - plot_margin_top - plot_height, 
+        c.drawImage(user_plot_path, 30, height - plot_margin_top - plot_height,
                     width=plot_width, height=plot_height, preserveAspectRatio=True, mask='auto')
 
         # Remove the temporary file for the plot
@@ -295,11 +299,11 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
         c.setFont("Helvetica", 12)
         c.drawString(placeholder_x + 10, placeholder_y + plot_height - 20, "Placeholder for Historical Data")
 
-        # Add the legend below the plots, spreading across the page
+        # Add the legend below the plots
         legend_labels = [f"{question_numbers[i]} - {topic_questions[i]['question']}" for i in range(len(topic_questions))]
         legend_text = "\n".join(legend_labels)
 
-        # Adjust y_position to place the legend just below the plots
+        # Adjust y_position to place the legend
         legend_y_position = height - plot_margin_top - plot_height - 40
         c.setFont("Helvetica", 10)
         c.setFillColor(colors.black)
@@ -312,6 +316,7 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
     c.save()
     pdf_buffer.seek(0)
     return pdf_buffer
+
 
 # New helper functions for maturity assessment
 def create_topic_tile(topic_name: str, description: str):
@@ -355,7 +360,7 @@ def display_topic_tiles():
     st.title("Maturity Assessment Topics")
     st.write("Select a topic to begin its assessment:")
     
-    # Remove the slicing to include all topics
+    # Get all topics
     topics = maturity_questions['topics']
     num_cols = 3  # Number of columns in the grid
     num_rows = (len(topics) + num_cols - 1) // num_cols  # Calculate the number of rows needed
@@ -367,19 +372,41 @@ def display_topic_tiles():
             topic_idx = row * num_cols + col_idx
             if topic_idx < len(topics):
                 topic = topics[topic_idx]
+                topic_name = topic['name']
                 with cols[col_idx]:
+                    # Display the tile
                     st.markdown(
                         create_topic_tile(
-                            topic['name'],
-                            get_topic_description(topic['name'])
+                            topic_name,
+                            get_topic_description(topic_name)
                         ),
                         unsafe_allow_html=True
                     )
                     
-                    # Handle click events using hidden buttons under tiles
-                    if st.button(f"Select {topic['name']}", key=f"btn_{topic['name']}", 
-                                help="Click to start assessment"):
-                        st.session_state.show_dialog = topic['name']
+                    # Hidden button to capture clicks on the tile
+                    if st.button(f"Select {topic_name}", key=f"btn_{topic_name}", 
+                                 help="Click to start assessment"):
+                        st.session_state.show_dialog = topic_name
+                        
+                    # If this topic is selected, display the dialog here
+                    if st.session_state.show_dialog == topic_name:
+                        # Reset the dialog state if needed
+                        st.session_state.show_dialog = None
+                        
+                        # Display the dialog under the tile
+                        with st.expander(f"Start Assessment for {topic_name}", expanded=True):
+                            st.write(get_topic_description(topic_name))
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                if st.button("Start Assessment", key=f"start_{topic_name}"):
+                                    st.session_state.current_page = 'assessment'
+                                    st.session_state.current_topic = topic_name
+                                    st.session_state.show_dialog = None  # Reset the dialog
+                                    st.experimental_rerun()
+                            with col2:
+                                if st.button("Close", key=f"close_{topic_name}"):
+                                    st.session_state.show_dialog = None
+                                    st.experimental_rerun()
 
 
 def display_topic_dialog():
@@ -686,7 +713,6 @@ def maturity_assessment():
                 file_name="maturity_assessment_report.pdf",
                 mime="application/pdf"
             )
-
 
 
 # Main application logic
