@@ -390,9 +390,6 @@ def display_topic_tiles():
                         
                     # If this topic is selected, display the dialog here
                     if st.session_state.show_dialog == topic_name:
-                        # Reset the dialog state if needed
-                        st.session_state.show_dialog = None
-                        
                         # Display the dialog under the tile
                         with st.expander(f"Start Assessment for {topic_name}", expanded=True):
                             st.write(get_topic_description(topic_name))
@@ -402,11 +399,12 @@ def display_topic_tiles():
                                     st.session_state.current_page = 'assessment'
                                     st.session_state.current_topic = topic_name
                                     st.session_state.show_dialog = None  # Reset the dialog
-                                    st.experimental_rerun()
+                                    st.rerun()
                             with col2:
                                 if st.button("Close", key=f"close_{topic_name}"):
                                     st.session_state.show_dialog = None
-                                    st.experimental_rerun()
+                                    st.rerun()
+
 
 
 def display_topic_dialog():
