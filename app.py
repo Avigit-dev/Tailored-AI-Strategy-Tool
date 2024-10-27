@@ -462,6 +462,11 @@ def generate_final_report():
         (0, 5)
     )
     
+    # Ensure we have a valid PDF output
+    if pdf_output is None:
+        st.error("Failed to generate the PDF report.")
+        return
+
     # Save to Google Sheets
     user_data = {
         'Timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -470,13 +475,13 @@ def generate_final_report():
     }
     
     if add_assessment_data_to_google_sheet(user_data):
-        st.session_state.assessment_pdf = pdf_output
+        st.session_state.assessment_pdf = pdf_output.getvalue()  # Extract byte value
         st.session_state.assessment_submitted = True
         st.success("Assessment completed! You can now download your report.")
     else:
         st.error("Failed to save assessment data.")
 
-# Then, outside of the form
+# Then, display the download button outside the function
 if st.session_state.assessment_submitted and st.session_state.assessment_pdf:
     st.download_button(
         label="Download Assessment Report",
@@ -484,6 +489,7 @@ if st.session_state.assessment_submitted and st.session_state.assessment_pdf:
         file_name="maturity_assessment_report.pdf",
         mime="application/pdf"
     )
+
 
 # Strategy Tool Module
 def strategy_tool():
