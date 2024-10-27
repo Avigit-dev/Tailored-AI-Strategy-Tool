@@ -384,11 +384,11 @@ def display_topic_dialog():
                 if st.button("Start Assessment", key=f"start_{topic_name}"):
                     st.session_state.current_page = 'assessment'
                     st.session_state.current_topic = topic_name
-                    st.experimental_rerun()
+                    st.rerun()
             with col2:
                 if st.button("Close", key=f"close_{topic_name}"):
                     st.session_state.show_dialog = None
-                    st.experimental_rerun()
+                    st.rerun()
 
 def display_topic_assessment(topic_name: str):
     st.title(f"{topic_name} Assessment")
@@ -421,7 +421,7 @@ def display_topic_assessment(topic_name: str):
                         'Company': company,
                         'Phone': phone
                     }
-                    st.experimental_rerun()
+                    st.rerun()
                 else:
                     st.error("Please fill in all fields.")
     else:
@@ -444,7 +444,7 @@ def display_topic_assessment(topic_name: str):
                 if st.form_submit_button("Submit and Continue to Other Topics"):
                     st.session_state.completed_topics.add(topic_name)
                     st.session_state.current_page = 'topic_selection'
-                    st.experimental_rerun()
+                    st.rerun()
             with col2:
                 if st.form_submit_button("Submit and Generate Final Report"):
                     st.session_state.completed_topics.add(topic_name)
@@ -665,7 +665,7 @@ def maturity_assessment():
         # Add back button
         if st.button("Back to Topics"):
             st.session_state.current_page = 'topic_selection'
-            st.experimental_rerun()
+            st.rerun()
 
 
 # Main application logic
