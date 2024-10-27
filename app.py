@@ -253,7 +253,7 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
 
         # Define question numbers and maturity levels based on the responses
         question_numbers = [f"Q{i+1}" for i in range(len(topic_questions))]
-        maturity_levels = [responses[q['id']] for q in topic_questions]
+        maturity_levels = [responses.get(q['id'], 0) for q in topic_questions]
 
         # Set up the user session plot
         plt.figure(figsize=(4, 4))
