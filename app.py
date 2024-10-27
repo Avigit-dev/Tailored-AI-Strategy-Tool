@@ -475,7 +475,7 @@ def generate_final_report():
     }
 
     if add_assessment_data_to_google_sheet(user_data):
-        st.session_state.assessment_pdf = pdf_output.getvalue()  # Extract byte value
+        st.session_state.assessment_pdf = pdf_output  # Store the entire buffer, not just the byte value
         st.session_state.assessment_submitted = True
         st.success("Assessment completed! You can now download your report.")
     else:
@@ -484,12 +484,11 @@ def generate_final_report():
 # Then, display the download button outside the function
 if st.session_state.assessment_submitted and st.session_state.assessment_pdf:
     st.download_button(
-        label="Download Assessment Report",
-        data=st.session_state.assessment_pdf,
-        file_name="maturity_assessment_report.pdf",
-        mime="application/pdf"
-    )
-
+    label="Download Assessment Report",
+    data=st.session_state.assessment_pdf.getvalue(),  # Extract byte content here
+    file_name="maturity_assessment_report.pdf",
+    mime="application/pdf"
+)
 
 
 # Strategy Tool Module
@@ -642,7 +641,7 @@ def strategy_tool():
     if st.session_state.form_submitted and st.session_state.pdf_output:
         st.download_button(
             label="Click here to download your report",
-            data=st.session_state.pdf_output,
+            data=st.session_state.pdf_output.getvalue(),  # Extract byte content here
             file_name="strategy_report.pdf",
             mime="application/pdf"
         )
