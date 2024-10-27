@@ -483,12 +483,12 @@ def display_topic_assessment(topic_name: str):
         with col1:
             if st.button("Continue to Other Topics"):
                 st.session_state.current_page = 'topic_selection'
-                st.experimental_rerun()  # Force the app to rerun and display the topic selection page
+                st.rerun()  # Force the app to rerun and display the topic selection page
         with col2:
             if st.button("Generate Final Report"):
                 # Set the page to 'contact_info' to display the contact info form
                 st.session_state.current_page = 'contact_info'
-                st.experimental_rerun()  # Force the app to rerun and display the contact info form
+                st.rerun()  # Force the app to rerun and display the contact info form
 
 def generate_final_report():
     if not st.session_state.completed_topics:
@@ -698,7 +698,7 @@ def maturity_assessment():
             # Proceed to generate the report
             generate_report_and_save()
             st.session_state.current_page = 'report'
-            st.experimental_rerun()  # Force the app to rerun and display the report page
+            st.rerun()  # Force the app to rerun and display the report page
         else:
             st.error("Please fill in all fields.")
     
