@@ -387,85 +387,61 @@ def display_topic_tiles():
 
     # Get all topics
     topics = maturity_questions['topics']
-    num_cols = 3
-    num_rows = (len(topics) + num_cols - 1) // num_cols
+    num_cols = 3  # Number of columns in the grid
+    num_rows = (len(topics) + num_cols - 1) // num_cols  # Calculate the number of rows needed
 
-    # Display the tiles
     for row in range(num_rows):
-        cols = st.columns(num_cols)
-        for col_idx in range(num_cols):
-            topic_idx = row * num_cols + col_idx
-            if topic_idx < len(topics):
-                topic = topics[topic_idx]
-                topic_name = topic['name']
-                with cols[col_idx]:
-                    st.markdown(
-                        create_topic_tile(topic_name, get_topic_description(topic_name)),
-                        unsafe_allow_html=True
-                    )
-                    # Button to select the topic
-                    if st.button(f"Select {topic_name}", key=f"btn_{topic_name}"):
-                        st.session_state.show_dialog = topic_name
+        # Create a container for the row
+        with st.container():
+            cols = st.columns(num_cols)
+            for col_idx in range(num_cols):
+                topic_idx = row * num_cols + col_idx
+                if topic_idx < len(topics):
+                    topic = topics[topic_idx]
+                    topic_name = topic['name']
+                    with cols[col_idx]:
+                        # Display the tile
+                        st.markdown(
+                            create_topic_tile(
+                                topic_name,
+                                get_topic_description(topic_name)
+                            ),
+                            unsafe_allow_html=True
+                        )
 
-    # Display the dialog outside the columns
-    if 'show_dialog' in st.session_state and st.session_state.show_dialog:
-        topic_name = st.session_state.show_dialog
-        display_full_width_dialog(topic_name)
+                        # Hidden button to capture clicks on the tile
+                        if st.button(f"Select {topic_name}", key=f"btn_{topic_name}",
+                                     help="Click to start assessment"):
+                            st.session_state.show_dialog = topic_name
 
-def display_full_width_dialog(topic_name):
-    # Add custom CSS for the dialog
-    st.markdown("""
-        <style>
-            .custom-dialog {
-                background-color: #5BD8B8;
-                padding: 20px;
-                border-radius: 10px;
-                margin-top: 20px;
-                width: 100%;
-            }
-            .custom-dialog h3, .custom-dialog p {
-                color: black;
-            }
-            .custom-dialog .button-container {
-                display: flex;
-                justify-content: center;
-                gap: 20px;
-                margin-top: 20px;
-            }
-            .custom-dialog .button-container button {
-                padding: 10px 20px;
-                background-color: #E96C25;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                font-size: 16px;
-            }
-            .custom-dialog .button-container button.close-button {
-                background-color: grey;
-            }
-        </style>
-    """, unsafe_allow_html=True)
+        # After the row, check if the dialog should be displayed
+        # and if the selected topic is in this row
+        if st.session_state.show_dialog:
+            selected_topic_idx = next((i for i, t in enumerate(topics) if t['name'] == st.session_state.show_dialog), None)
+            selected_row = selected_topic_idx // num_cols
+            if selected_row == row:
+                # Display the dialog covering the full width
+                st.markdown(f"""
+                    <div style='background-color: #5BD8B8; padding: 20px; border-radius: 10px; margin-bottom: 20px;'>
+                        <h3>Start Assessment for {st.session_state.show_dialog}</h3>
+                        <p>{get_topic_description(st.session_state.show_dialog)}</p>
+                        <div style='display: flex; gap: 20px;'>
+                """, unsafe_allow_html=True)
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("Start Assessment", key=f"start_{st.session_state.show_dialog}"):
+                        st.session_state.current_page = 'assessment'
+                        st.session_state.current_topic = st.session_state.show_dialog
+                        st.session_state.show_dialog = None  # Reset the dialog
+                        st.experimental_rerun()
+                with col2:
+                    if st.button("Close", key=f"close_{st.session_state.show_dialog}"):
+                        st.session_state.show_dialog = None
+                        st.experimental_rerun()
+                st.markdown("</div></div>", unsafe_allow_html=True)
+                # Break the loop since we've displayed the dialog
+                break
 
-    # Display the dialog
-    with st.container():
-        st.markdown(f"<div class='custom-dialog'>", unsafe_allow_html=True)
-        st.write(f"### Start Assessment for {topic_name}")
-        st.write(get_topic_description(topic_name))
-        
-        # Create a container for the buttons
-        button_cols = st.columns([1, 1, 1])
-        with button_cols[1]:
-            if st.button("Start Assessment", key=f"start_{topic_name}"):
-                st.session_state.current_page = 'assessment'
-                st.session_state.current_topic = topic_name
-                st.session_state.show_dialog = None
-                st.rerun()
-        with button_cols[2]:
-            if st.button("Close", key=f"close_{topic_name}"):
-                st.session_state.show_dialog = None
-                st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
 
 
 def display_topic_dialog():
