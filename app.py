@@ -326,26 +326,27 @@ def generate_report_and_save():
         st.session_state.user_info,
         (0, 5)
     )
-
+    
     # Ensure we have a valid PDF output
     if pdf_output is None:
         st.error("Failed to generate the PDF report.")
         return
-
+    
     # Save to Google Sheets
     user_data = {
         'Timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         **st.session_state.user_info,
         **st.session_state.responses
     }
-
+    
     if add_assessment_data_to_google_sheet(user_data):
         st.session_state.assessment_pdf = pdf_output
         st.session_state.assessment_submitted = True
         st.success("Assessment completed! You can now download your report.")
-        st.rerun()
+        # No need to call st.rerun()
     else:
         st.error("Failed to save assessment data.")
+
 
 
 def create_topic_tile(topic_name: str, description: str):
@@ -493,7 +494,10 @@ def display_topic_assessment(topic_name: str):
                 st.rerun()
         with col2:
             if st.button("Generate Final Report"):
-                generate_final_report()
+                # Set the page to 'contact_info' to display the contact info form
+                st.session_state.current_page = 'contact_info'
+                st.rerun()
+
 
 
 
@@ -501,30 +505,9 @@ def generate_final_report():
     if not st.session_state.completed_topics:
         st.error("Please complete at least one topic assessment before generating the report.")
         return
-
-    # Check if user info is collected
-    if not st.session_state.get('user_info'):
-        st.write("### Please fill in your contact information to download the report")
-        name = st.text_input("Full Name")
-        email = st.text_input("Email Address")
-        company = st.text_input("Company Name")
-        phone = st.text_input("Phone Number")
-        if st.button("Submit"):
-            if all([name, email, company, phone]):
-                st.session_state.user_info = {
-                    'Name': name,
-                    'Email': email,
-                    'Company': company,
-                    'Phone': phone
-                }
-                st.success("Your information has been submitted.")
-                # Proceed to generate the report
-                generate_report_and_save()
-            else:
-                st.error("Please fill in all fields.")
     else:
-        # User info is already collected
         generate_report_and_save()
+
 
 
 
@@ -701,7 +684,8 @@ def maturity_assessment():
             st.write("### Completed Assessments")
             st.write(f"You have completed assessments for: {', '.join(st.session_state.completed_topics)}")
             if st.button("Generate Final Report"):
-                generate_final_report()
+                st.session_state.current_page = 'contact_info'
+                st.rerun()
                 
     elif st.session_state.current_page == 'assessment':
         display_topic_assessment(st.session_state.current_topic)
@@ -711,8 +695,31 @@ def maturity_assessment():
             st.session_state.current_page = 'topic_selection'
             st.rerun()
     
-    # Move the download button code here to display it at the bottom
-    if st.session_state.get('assessment_submitted'):
+    elif st.session_state.current_page == 'contact_info':
+        st.write("### Please fill in your contact information to download the report")
+        with st.form("contact_form"):
+            name = st.text_input("Full Name")
+            email = st.text_input("Email Address")
+            company = st.text_input("Company Name")
+            phone = st.text_input("Phone Number")
+            submitted = st.form_submit_button("Submit")
+        if submitted:
+            if all([name, email, company, phone]):
+                st.session_state.user_info = {
+                    'Name': name,
+                    'Email': email,
+                    'Company': company,
+                    'Phone': phone
+                }
+                st.success("Your information has been submitted.")
+                # Proceed to generate the report
+                st.session_state.current_page = 'report'
+                generate_report_and_save()
+            else:
+                st.error("Please fill in all fields.")
+    
+    elif st.session_state.current_page == 'report':
+        st.title("Your Assessment Report is Ready")
         pdf_output = st.session_state.assessment_pdf  # Use the stored PDF output
         if pdf_output:
             st.download_button(
@@ -721,6 +728,9 @@ def maturity_assessment():
                 file_name="maturity_assessment_report.pdf",
                 mime="application/pdf"
             )
+        else:
+            st.error("No report available for download.")
+
 
 
 # Main application logic
