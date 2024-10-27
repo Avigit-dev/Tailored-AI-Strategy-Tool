@@ -665,6 +665,16 @@ def maturity_assessment():
             st.write(f"You have completed assessments for: {', '.join(st.session_state.completed_topics)}")
             if st.button("Generate Final Report"):
                 generate_final_report()
+
+             # Show download button for the generated report only on the topics page
+            if st.session_state.assessment_submitted and st.session_state.assessment_pdf:
+                st.session_state.assessment_pdf.seek(0)  # Reset buffer to the start
+                st.download_button(
+                    label="Download Assessment Report",
+                    data=st.session_state.assessment_pdf,
+                    file_name="maturity_assessment_report.pdf",
+                    mime="application/pdf"
+                )
                 
     elif st.session_state.current_page == 'assessment':
         display_topic_assessment(st.session_state.current_topic)
