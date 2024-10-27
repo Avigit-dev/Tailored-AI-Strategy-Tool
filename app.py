@@ -484,14 +484,22 @@ def generate_final_report():
     else:
         st.error("Failed to save assessment data.")
 
-# Then, display the download button outside the function
-if st.session_state.assessment_submitted and st.session_state.assessment_pdf:
-    st.download_button(
-    label="Download Assessment Report",
-    data=st.session_state.assessment_pdf.getvalue(),  # Extract byte content here
-    file_name="maturity_assessment_report.pdf",
-    mime="application/pdf"
-)
+# Generate and display the download button outside the function
+if st.session_state.assessment_submitted:
+    pdf_output = generate_assessment_pdf(
+        st.session_state.responses,
+        st.session_state.user_info,
+        (0, 5)
+    )
+
+    # Ensure we have a valid PDF output
+    if pdf_output:
+        st.download_button(
+            label="Download Assessment Report",
+            data=pdf_output.getvalue(),  # Extract byte content here
+            file_name="maturity_assessment_report.pdf",
+            mime="application/pdf"
+        )
 
 
 # Strategy Tool Module
