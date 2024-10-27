@@ -671,11 +671,6 @@ def maturity_assessment():
                 
     elif st.session_state.current_page == 'assessment':
         display_topic_assessment(st.session_state.current_topic)
-        
-        # Add back button
-        if st.button("Back to Topics"):
-            st.session_state.current_page = 'topic_selection'
-            st.rerun()
     
     elif st.session_state.current_page == 'contact_info':
         st.write("### Please fill in your contact information to download the report")
