@@ -315,8 +315,8 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
 
 # New helper functions for maturity assessment
 def create_topic_tile(topic_name: str, description: str):
-    # Create a clickable tile with consistent styling
-    tile_style = """
+    # Create a clickable tile with consistent styling and fixed height
+    tile_style = f"""
         <div style='
             background-color: #E96C25;
             color: white;
@@ -325,18 +325,19 @@ def create_topic_tile(topic_name: str, description: str):
             margin: 10px;
             cursor: pointer;
             text-align: center;
-            min-height: 150px;
+            height: 200px;  /* Set a fixed height */
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
             transition: transform 0.2s;
-        ' onclick='handle_tile_click("{}")'>
-            <h3>{}</h3>
-            <p style='font-size: 0.9em;'>{}</p>
+        ' onclick='handle_tile_click("{topic_name}")'>
+            <h3>{topic_name}</h3>
+            <p style='font-size: 0.9em;'>{description}</p>
         </div>
-    """.format(topic_name, topic_name, description)
-    
+    """
     return tile_style
+
 
 def get_topic_description(topic_name: str) -> str:
     # Add descriptions for each topic
@@ -354,25 +355,32 @@ def display_topic_tiles():
     st.title("Maturity Assessment Topics")
     st.write("Select a topic to begin its assessment:")
     
-    # Create a 3x2 grid for topics
-    cols = st.columns(3)
-    topics = maturity_questions['topics'][:6]  # Get first 6 topics
+    # Remove the slicing to include all topics
+    topics = maturity_questions['topics']
+    num_cols = 3  # Number of columns in the grid
+    num_rows = (len(topics) + num_cols - 1) // num_cols  # Calculate the number of rows needed
     
-    for idx, topic in enumerate(topics):
-        col_idx = idx % 3
-        with cols[col_idx]:
-            st.markdown(
-                create_topic_tile(
-                    topic['name'],
-                    get_topic_description(topic['name'])
-                ),
-                unsafe_allow_html=True
-            )
-            
-            # Handle click events using streamlit buttons (hidden under tiles)
-            if st.button(f"Select {topic['name']}", key=f"btn_{topic['name']}", 
-                        help="Click to start assessment"):
-                st.session_state.show_dialog = topic['name']
+    # Create a grid layout
+    for row in range(num_rows):
+        cols = st.columns(num_cols)
+        for col_idx in range(num_cols):
+            topic_idx = row * num_cols + col_idx
+            if topic_idx < len(topics):
+                topic = topics[topic_idx]
+                with cols[col_idx]:
+                    st.markdown(
+                        create_topic_tile(
+                            topic['name'],
+                            get_topic_description(topic['name'])
+                        ),
+                        unsafe_allow_html=True
+                    )
+                    
+                    # Handle click events using hidden buttons under tiles
+                    if st.button(f"Select {topic['name']}", key=f"btn_{topic['name']}", 
+                                help="Click to start assessment"):
+                        st.session_state.show_dialog = topic['name']
+
 
 def display_topic_dialog():
     if st.session_state.show_dialog:
@@ -483,23 +491,6 @@ def generate_final_report():
         st.success("Assessment completed! You can now download your report.")
     else:
         st.error("Failed to save assessment data.")
-
-# Generate and display the download button outside the function
-if st.session_state.assessment_submitted:
-    pdf_output = generate_assessment_pdf(
-        st.session_state.responses,
-        st.session_state.user_info,
-        (0, 5)
-    )
-
-    # Ensure we have a valid PDF output
-    if pdf_output:
-        st.download_button(
-            label="Download Assessment Report",
-            data=pdf_output.getvalue(),  # Extract byte content here
-            file_name="maturity_assessment_report.pdf",
-            mime="application/pdf"
-        )
 
 
 # Strategy Tool Module
@@ -684,6 +675,18 @@ def maturity_assessment():
         if st.button("Back to Topics"):
             st.session_state.current_page = 'topic_selection'
             st.rerun()
+    
+    # Move the download button code here to display it at the bottom
+    if st.session_state.assessment_submitted:
+        pdf_output = st.session_state.assessment_pdf  # Use the stored PDF output
+        if pdf_output:
+            st.download_button(
+                label="Download Assessment Report",
+                data=pdf_output.getvalue(),
+                file_name="maturity_assessment_report.pdf",
+                mime="application/pdf"
+            )
+
 
 
 # Main application logic
