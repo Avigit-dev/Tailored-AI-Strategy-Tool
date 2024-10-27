@@ -340,12 +340,13 @@ def generate_report_and_save():
     }
 
     if add_assessment_data_to_google_sheet(user_data):
-        st.session_state.assessment_pdf = pdf_output  # Store the entire buffer
+        st.session_state.assessment_pdf = pdf_output
         st.session_state.assessment_submitted = True
         st.success("Assessment completed! You can now download your report.")
-        st.experimental_rerun()  # Refresh to show the download button
+        st.rerun()
     else:
         st.error("Failed to save assessment data.")
+
 
 def create_topic_tile(topic_name: str, description: str):
     # Create a clickable tile with consistent styling and fixed height
@@ -456,8 +457,8 @@ def display_topic_assessment(topic_name: str):
     
     # Get questions for current topic
     topic_questions = next(
-        (topic for topic in maturity_questions['topics'] 
-         if topic['name'] == topic_name), 
+        (topic for topic in maturity_questions['topics']
+         if topic['name'] == topic_name),
         None
     )
     
@@ -479,16 +480,21 @@ def display_topic_assessment(topic_name: str):
             )
             st.session_state.responses[q_id] = response
         
+        submitted = st.form_submit_button("Submit Assessment")
+    
+    if submitted:
+        st.session_state.completed_topics.add(topic_name)
+        st.success("Your assessment has been submitted.")
+        # Present options to the user outside the form
         col1, col2 = st.columns(2)
         with col1:
-            if st.form_submit_button("Submit and Continue to Other Topics"):
-                st.session_state.completed_topics.add(topic_name)
+            if st.button("Continue to Other Topics"):
                 st.session_state.current_page = 'topic_selection'
-                st.experimental_rerun()
+                st.rerun()
         with col2:
-            if st.form_submit_button("Submit and Generate Final Report"):
-                st.session_state.completed_topics.add(topic_name)
+            if st.button("Generate Final Report"):
                 generate_final_report()
+
 
 
 def generate_final_report():
@@ -498,29 +504,28 @@ def generate_final_report():
 
     # Check if user info is collected
     if not st.session_state.get('user_info'):
-        with st.form("user_info_form"):
-            st.write("### Please fill in your contact information to download the report")
-            name = st.text_input("Full Name")
-            email = st.text_input("Email Address")
-            company = st.text_input("Company Name")
-            phone = st.text_input("Phone Number")
-            
-            if st.form_submit_button("Submit"):
-                if all([name, email, company, phone]):
-                    st.session_state.user_info = {
-                        'Name': name,
-                        'Email': email,
-                        'Company': company,
-                        'Phone': phone
-                    }
-                    st.success("Your information has been submitted.")
-                    # Proceed to generate the report
-                    generate_report_and_save()
-                else:
-                    st.error("Please fill in all fields.")
+        st.write("### Please fill in your contact information to download the report")
+        name = st.text_input("Full Name")
+        email = st.text_input("Email Address")
+        company = st.text_input("Company Name")
+        phone = st.text_input("Phone Number")
+        if st.button("Submit"):
+            if all([name, email, company, phone]):
+                st.session_state.user_info = {
+                    'Name': name,
+                    'Email': email,
+                    'Company': company,
+                    'Phone': phone
+                }
+                st.success("Your information has been submitted.")
+                # Proceed to generate the report
+                generate_report_and_save()
+            else:
+                st.error("Please fill in all fields.")
     else:
         # User info is already collected
         generate_report_and_save()
+
 
 
 
@@ -704,7 +709,7 @@ def maturity_assessment():
         # Add back button
         if st.button("Back to Topics"):
             st.session_state.current_page = 'topic_selection'
-            st.experimental_rerun()
+            st.rerun()
     
     # Move the download button code here to display it at the bottom
     if st.session_state.get('assessment_submitted'):
