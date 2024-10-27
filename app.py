@@ -475,7 +475,7 @@ def display_topic_assessment(topic_name: str):
             )
             st.session_state.responses[q_id] = response
         
-        submitted = st.form_submit_button("Submit Assessment", key=f"submit_assessment_{topic_name}")
+        submitted = st.form_submit_button("Submit Assessment")  # Removed 'key' parameter
     
     if submitted:
         st.session_state.completed_topics.add(topic_name)
@@ -679,12 +679,12 @@ def maturity_assessment():
     
     elif st.session_state.current_page == 'contact_info':
         st.write("### Please fill in your contact information to download the report")
-        with st.form("contact_form"):
+        with st.form(key='contact_form'):  # Ensure the form has a unique key
             name = st.text_input("Full Name")
             email = st.text_input("Email Address")
             company = st.text_input("Company Name")
             phone = st.text_input("Phone Number")
-            submitted = st.form_submit_button("Submit", key='contact_submit')
+            submitted = st.form_submit_button("Submit")  # Removed 'key' parameter
         if submitted:
             if all([name, email, company, phone]):
                 st.session_state.user_info = {
