@@ -31,6 +31,16 @@ if 'assessment_pdf' not in st.session_state:
     st.session_state.assessment_pdf = None
 if 'responses' not in st.session_state:
     st.session_state.responses = {}
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = 'topic_selection'
+if 'selected_topics' not in st.session_state:
+    st.session_state.selected_topics = set()
+if 'completed_topics' not in st.session_state:
+    st.session_state.completed_topics = set()
+if 'show_dialog' not in st.session_state:
+    st.session_state.show_dialog = None
+if 'user_info' not in st.session_state:
+    st.session_state.user_info = {}
 
 # Load images
 @st.cache_resource
@@ -126,7 +136,7 @@ def add_assessment_data_to_google_sheet(user_data):
         print(f"Error while saving data: {e}")
         return False
 
-# Generate PDF functions for Strategy Tool and Maturity Assessment
+# Generate PDF functions for Strategy Tool
 def generate_pdf(goal, method, tool, kpi, use_cases, partners):
     pdf_buffer = io.BytesIO()
     c = canvas.Canvas(pdf_buffer, pagesize=landscape(A4))
@@ -303,6 +313,176 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
     pdf_buffer.seek(0)
     return pdf_buffer
 
+# New helper functions for maturity assessment
+def create_topic_tile(topic_name: str, description: str):
+    # Create a clickable tile with consistent styling
+    tile_style = """
+        <div style='
+            background-color: #E96C25;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px;
+            cursor: pointer;
+            text-align: center;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.2s;
+        ' onclick='handle_tile_click("{}")'>
+            <h3>{}</h3>
+            <p style='font-size: 0.9em;'>{}</p>
+        </div>
+    """.format(topic_name, topic_name, description)
+    
+    return tile_style
+
+def get_topic_description(topic_name: str) -> str:
+    # Add descriptions for each topic
+    descriptions = {
+        "ERP Harmonization": "Assessment of your organization's ERP system unification and standardization efforts across departments and regions.",
+        "Standardization of Processes": "Evaluation of business process documentation, standardization, and implementation across the organization.",
+        "Integration Across Departments and Regions": "Analysis of cross-departmental collaboration and regional alignment with corporate processes.",
+        "Optimization of Capex": "Assessment of capital expenditure planning, prioritization, and management processes.",
+        "Improvement of Opex": "Evaluation of operational expense tracking, optimization, and cost reduction initiatives.",
+        "KPI Monitoring and Management": "Analysis of KPI definition, monitoring, and utilization for decision-making processes."
+    }
+    return descriptions.get(topic_name, "Assess your organization's maturity in this area.")
+
+def display_topic_tiles():
+    st.title("Maturity Assessment Topics")
+    st.write("Select a topic to begin its assessment:")
+    
+    # Create a 3x2 grid for topics
+    cols = st.columns(3)
+    topics = maturity_questions['topics'][:6]  # Get first 6 topics
+    
+    for idx, topic in enumerate(topics):
+        col_idx = idx % 3
+        with cols[col_idx]:
+            st.markdown(
+                create_topic_tile(
+                    topic['name'],
+                    get_topic_description(topic['name'])
+                ),
+                unsafe_allow_html=True
+            )
+            
+            # Handle click events using streamlit buttons (hidden under tiles)
+            if st.button(f"Select {topic['name']}", key=f"btn_{topic['name']}", 
+                        help="Click to start assessment"):
+                st.session_state.show_dialog = topic['name']
+
+def display_topic_dialog():
+    if st.session_state.show_dialog:
+        topic_name = st.session_state.show_dialog
+        with st.expander(topic_name, expanded=True):
+            st.write(get_topic_description(topic_name))
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("Start Assessment", key=f"start_{topic_name}"):
+                    st.session_state.current_page = 'assessment'
+                    st.session_state.current_topic = topic_name
+                    st.experimental_rerun()
+            with col2:
+                if st.button("Close", key=f"close_{topic_name}"):
+                    st.session_state.show_dialog = None
+                    st.experimental_rerun()
+
+def display_topic_assessment(topic_name: str):
+    st.title(f"{topic_name} Assessment")
+    
+    # Get questions for current topic
+    topic_questions = next(
+        (topic for topic in maturity_questions['topics'] 
+         if topic['name'] == topic_name), 
+        None
+    )
+    
+    if not topic_questions:
+        st.error(f"No questions found for topic: {topic_name}")
+        return
+    
+    # Display user information form if not already filled
+    if not st.session_state.user_info:
+        with st.form("user_info_form"):
+            st.write("### Please fill in your contact information")
+            name = st.text_input("Full Name")
+            email = st.text_input("Email Address")
+            company = st.text_input("Company Name")
+            phone = st.text_input("Phone Number")
+            
+            if st.form_submit_button("Continue to Assessment"):
+                if all([name, email, company, phone]):
+                    st.session_state.user_info = {
+                        'Name': name,
+                        'Email': email,
+                        'Company': company,
+                        'Phone': phone
+                    }
+                    st.experimental_rerun()
+                else:
+                    st.error("Please fill in all fields.")
+    else:
+        # Display assessment questions
+        with st.form(key=f"assessment_form_{topic_name}"):
+            st.write("### Assessment Questions")
+            for question in topic_questions['questions']:
+                q_id = question['id']
+                st.write(question['question'])
+                response = st.radio(
+                    f"Select maturity level for question {q_id}",
+                    options=[1, 2, 3, 4, 5],
+                    format_func=lambda x: f"{x} - {maturity_questions['scale'][str(x)]}",
+                    key=f"q_{q_id}"
+                )
+                st.session_state.responses[q_id] = response
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.form_submit_button("Submit and Continue to Other Topics"):
+                    st.session_state.completed_topics.add(topic_name)
+                    st.session_state.current_page = 'topic_selection'
+                    st.experimental_rerun()
+            with col2:
+                if st.form_submit_button("Submit and Generate Final Report"):
+                    st.session_state.completed_topics.add(topic_name)
+                    generate_final_report()
+
+def generate_final_report():
+    if not st.session_state.completed_topics:
+        st.error("Please complete at least one topic assessment before generating the report.")
+        return
+    
+    # Generate PDF report only for completed topics
+    pdf_output = generate_assessment_pdf(
+        st.session_state.responses,
+        st.session_state.user_info,
+        (0, 5)
+    )
+    
+    # Save to Google Sheets
+    user_data = {
+        'Timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        **st.session_state.user_info,
+        **st.session_state.responses
+    }
+    
+    if add_assessment_data_to_google_sheet(user_data):
+        st.session_state.assessment_pdf = pdf_output
+        st.session_state.assessment_submitted = True
+        st.success("Assessment completed! You can now download your report.")
+        
+        # Display download button
+        st.download_button(
+            label="Download Assessment Report",
+            data=st.session_state.assessment_pdf,
+            file_name="maturity_assessment_report.pdf",
+            mime="application/pdf"
+        )
+    else:
+        st.error("Failed to save assessment data.")
 
 # Strategy Tool Module
 def strategy_tool():
@@ -460,87 +640,32 @@ def strategy_tool():
         )
 
 
-# Maturity Assessment Module
+# Modified maturity_assessment function
 def maturity_assessment():
-    st.title("Maturity Assessment")
-
     # Load and display images
     st.image(background_image, use_column_width=True)
     st.image(logo_image, use_column_width=False, width=300)
-
-    scale = maturity_questions['scale']
-
-    # Check if assessment is already submitted
-    if not st.session_state.assessment_submitted:
-        # Create assessment form
-        with st.form(key="maturity_assessment_form"):
-            st.write("### Please fill in your contact information")
-            name = st.text_input("Full Name", key="name")
-            email = st.text_input("Email Address", key="email")
-            company = st.text_input("Company Name", key="company")
-            phone = st.text_input("Phone Number", key="phone")
-
-            st.write("### Assessment Questions")
-            for topic in maturity_questions['topics']:
-                st.subheader(topic['name'])
-                for question in topic['questions']:
-                    q_id = question['id']
-                    st.write(question['question'])
-                    response = st.radio(
-                        f"Select maturity level for question {q_id}",
-                        options=[1, 2, 3, 4, 5],
-                        format_func=lambda x: f"{x} - {scale[str(x)]}",
-                        key=f"q_{q_id}"
-                    )
-                    st.session_state.responses[q_id] = response
-
-            submit_button = st.form_submit_button("Submit Assessment")
-
-            if submit_button:
-                if name and email and company and phone:
-                    # Prepare user data
-                    user_data = {
-                        'Timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        'Name': name,
-                        'Email': email,
-                        'Company': company,
-                        'Phone': phone,
-                        **st.session_state.responses
-                    }
-
-                    # Save to Google Sheets
-                    if add_assessment_data_to_google_sheet(user_data):
-                        # Define the y-axis range for the assessment report
-                        y_axis_range = (0, 5)  # Fixed range for maturity levels from 0 to 5
-
-                        # Generate PDF report
-                        pdf_output = generate_assessment_pdf(
-                            st.session_state.responses,
-                            {
-                                'Name': name,
-                                'Email': email,
-                                'Company': company,
-                                'Phone': phone
-                            },
-                            y_axis_range  # Pass the y_axis_range as the third argument
-                        )
-                        st.session_state.assessment_pdf = pdf_output
-                        st.session_state.assessment_submitted = True
-                        st.success("Assessment submitted successfully!")
-                    else:
-                        st.error("Failed to save assessment data.")
-                else:
-                    st.error("Please fill in all contact information fields.")
-
-    # Show download button if assessment is submitted
-    if st.session_state.assessment_submitted and st.session_state.assessment_pdf is not None:
-        st.success("Your assessment has been completed!")
-        st.download_button(
-            label="Download Assessment Report",
-            data=st.session_state.assessment_pdf,
-            file_name="maturity_assessment_report.pdf",
-            mime="application/pdf"
-        )
+    
+    # Handle different pages in the assessment flow
+    if st.session_state.current_page == 'topic_selection':
+        display_topic_tiles()
+        display_topic_dialog()
+        
+        # Show option to generate final report if any topics completed
+        if st.session_state.completed_topics:
+            st.write("---")
+            st.write("### Completed Assessments")
+            st.write(f"You have completed assessments for: {', '.join(st.session_state.completed_topics)}")
+            if st.button("Generate Final Report"):
+                generate_final_report()
+                
+    elif st.session_state.current_page == 'assessment':
+        display_topic_assessment(st.session_state.current_topic)
+        
+        # Add back button
+        if st.button("Back to Topics"):
+            st.session_state.current_page = 'topic_selection'
+            st.experimental_rerun()
 
 
 # Main application logic

@@ -162,6 +162,148 @@
           "question": "To what degree are KPIs used to drive continuous improvement initiatives?"
         }
       ]
+    },
+    {"name": "Strategic Investments",
+      "abbreviation": "Strategic Investments",
+      "questions": [
+        {"id": "Strategic Investments Q1", "question": "Question 1"},
+        {"id": "Strategic Investments Q2", "question": "Question 2"},
+        {"id": "Strategic Investments Q3", "question": "Question 3"},
+        {"id": "Strategic Investments Q4", "question": "Question 4"},
+        {"id": "Strategic Investments Q5", "question": "Question 5"}
+      ]
+    },
+    {
+      "name": "Inventory",
+      "abbreviation": "Inventory",
+      "questions": [
+        {"id": "Inventory Q1", "question": "Question 1"},
+        {"id": "Inventory Q2", "question": "Question 2"},
+        {"id": "Inventory Q3", "question": "Question 3"},
+        {"id": "Inventory Q4", "question": "Question 4"},
+        {"id": "Inventory Q5", "question": "Question 5"}
+      ]
+    },
+    {
+      "name": "Post Merger Integration",
+      "abbreviation": "Post Merger Integration",
+      "questions": [
+        {"id": "Post Merger Integration Q1", "question": "Question 1"},
+        {"id": "Post Merger Integration Q2", "question": "Question 2"},
+        {"id": "Post Merger Integration Q3", "question": "Question 3"},
+        {"id": "Post Merger Integration Q4", "question": "Question 4"},
+        {"id": "Post Merger Integration Q5", "question": "Question 5"}
+      ]
+    },
+    {
+      "name": "Sales Conversion",
+      "abbreviation": "Sales Conversion",
+      "questions": [
+        {"id": "Sales Conversion Q1", "question": "Question 1"},
+        {"id": "Sales Conversion Q2", "question": "Question 2"},
+        {"id": "Sales Conversion Q3", "question": "Question 3"},
+        {"id": "Sales Conversion Q4", "question": "Question 4"},
+        {"id": "Sales Conversion Q5", "question": "Question 5"}
+      ]
+    },
+    {
+      "name": "Project Completion",
+      "abbreviation": "Project Completion",
+      "questions": [
+        {"id": "Project Completion Q1", "question": "Question 1"},
+        {"id": "Project Completion Q2", "question": "Question 2"},
+        {"id": "Project Completion Q3", "question": "Question 3"},
+        {"id": "Project Completion Q4", "question": "Question 4"},
+        {"id": "Project Completion Q5", "question": "Question 5"}
+      ]
+    },
+    {
+      "name": "Compliance",
+      "abbreviation": "Compliance",
+      "questions": [
+        {"id": "Compliance Q1", "question": "Question 1"},
+        {"id": "Compliance Q2", "question": "Question 2"},
+        {"id": "Compliance Q3", "question": "Question 3"},
+        {"id": "Compliance Q4", "question": "Question 4"},
+        {"id": "Compliance Q5", "question": "Question 5"}
+      ]
+    },
+    {
+      "name": "Order Fulfillment",
+      "abbreviation": "Order Fulfillment",
+      "questions": [
+        {"id": "Order Fulfillment Q1", "question": "Question 1"},
+        {"id": "Order Fulfillment Q2", "question": "Question 2"},
+        {"id": "Order Fulfillment Q3", "question": "Question 3"},
+        {"id": "Order Fulfillment Q4", "question": "Question 4"},
+        {"id": "Order Fulfillment Q5", "question": "Question 5"}
+      ]
+    },
+    {
+      "name": "Procurement Effort",
+      "abbreviation": "Procurement Effort",
+      "questions": [
+        {"id": "Procurement Effort Q1", "question": "Question 1"},
+        {"id": "Procurement Effort Q2", "question": "Question 2"},
+        {"id": "Procurement Effort Q3", "question": "Question 3"},
+        {"id": "Procurement Effort Q4", "question": "Question 4"},
+        {"id": "Procurement Effort Q5", "question": "Question 5"}
+      ]
+    },
+    {
+      "name": "Administration",
+      "abbreviation": "Administration",
+      "questions": [
+        {"id": "Administration Q1", "question": "Question 1"},
+        {"id": "Administration Q2", "question": "Question 2"},
+        {"id": "Administration Q3", "question": "Question 3"},
+        {"id": "Administration Q4", "question": "Question 4"},
+        {"id": "Administration Q5", "question": "Question 5"}
+      ]
+    },
+    {
+      "name": "IT Maintenance",
+      "abbreviation": "IT Maintenance",
+      "questions": [
+        {"id": "IT Maintenance Q1", "question": "Question 1"},
+        {"id": "IT Maintenance Q2", "question": "Question 2"},
+        {"id": "IT Maintenance Q3", "question": "Question 3"},
+        {"id": "IT Maintenance Q4", "question": "Question 4"},
+        {"id": "IT Maintenance Q5", "question": "Question 5"}
+      ]
+    },
+    {
+      "name": "Data Management",
+      "abbreviation": "Data Management",
+      "questions": [
+        {"id": "Data Management Q1", "question": "Question 1"},
+        {"id": "Data Management Q2", "question": "Question 2"},
+        {"id": "Data Management Q3", "question": "Question 3"},
+        {"id": "Data Management Q4", "question": "Question 4"},
+        {"id": "Data Management Q5", "question": "Question 5"}
+      ]
+    },
+    {
+      "name": "Qualification",
+      "abbreviation": "Qualification",
+      "questions": [
+        {"id": "Qualification Q1", "question": "Question 1"},
+        {"id": "Qualification Q2", "question": "Question 2"},
+        {"id": "Qualification Q3", "question": "Question 3"},
+        {"id": "Qualification Q4", "question": "Question 4"},
+        {"id": "Qualification Q5", "question": "Question 5"}
+      ]
+    },
+    {
+      "name": "Ecosystem Management",
+      "abbreviation": "Ecosystem Management",
+      "questions": [
+        {"id": "Ecosystem Management Q1", "question": "Question 1"},
+        {"id": "Ecosystem Management Q2", "question": "Question 2"},
+        {"id": "Ecosystem Management Q3", "question": "Question 3"},
+        {"id": "Ecosystem Management Q4", "question": "Question 4"},
+        {"id": "Ecosystem Management Q5", "question": "Question 5"}
+      ]
     }
   ]
 }
