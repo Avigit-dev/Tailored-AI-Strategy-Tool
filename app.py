@@ -433,11 +433,9 @@ def display_topic_tiles():
                         st.session_state.current_page = 'assessment'
                         st.session_state.current_topic = st.session_state.show_dialog
                         st.session_state.show_dialog = None  # Reset the dialog
-                        st.rerun()
                 with col2:
                     if st.button("Close", key=f"close_{st.session_state.show_dialog}"):
                         st.session_state.show_dialog = None
-                        st.rerun()
                 st.markdown("</div></div>", unsafe_allow_html=True)
                 # Break the loop since we've displayed the dialog
                 break
