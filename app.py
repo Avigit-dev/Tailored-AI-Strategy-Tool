@@ -428,7 +428,8 @@ def display_topic_tiles():
                             with col2:
                                 if st.button("Close", key=f"close_{topic_name}"):
                                     st.session_state.show_dialog = None
-                                    st.rerun()
+                                    st.run()
+
 
 def display_topic_dialog():
     if st.session_state.show_dialog:
@@ -474,7 +475,7 @@ def display_topic_assessment(topic_name: str):
             )
             st.session_state.responses[q_id] = response
         
-        submitted = st.form_submit_button("Submit Assessment")
+        submitted = st.form_submit_button("Submit Assessment", key=f"submit_assessment_{topic_name}")
     
     if submitted:
         st.session_state.completed_topics.add(topic_name)
@@ -483,7 +484,7 @@ def display_topic_assessment(topic_name: str):
         st.info("You can download your report by returning to the topics page using the 'Back to Topics' button and scrolling to the bottom.")
     
     # Add the 'Back to Topics' button outside the if block so it's always available
-    if st.button("Back to Topics"):
+    if st.button("Back to Topics", key=f"back_{topic_name}"):
         st.session_state.current_page = 'topic_selection'
         st.rerun()
 
@@ -664,7 +665,7 @@ def maturity_assessment():
             st.write("---")
             st.write("### Completed Assessments")
             st.write(f"You have completed assessments for: {', '.join(st.session_state.completed_topics)}")
-            if st.button("Generate Final Report"):
+            if st.button("Generate Final Report", key='generate_report'):
                 st.session_state.current_page = 'contact_info'
                 st.rerun()
                 
@@ -683,7 +684,7 @@ def maturity_assessment():
             email = st.text_input("Email Address")
             company = st.text_input("Company Name")
             phone = st.text_input("Phone Number")
-            submitted = st.form_submit_button("Submit")
+            submitted = st.form_submit_button("Submit", key='contact_submit')
         if submitted:
             if all([name, email, company, phone]):
                 st.session_state.user_info = {
@@ -692,12 +693,12 @@ def maturity_assessment():
                     'Company': company,
                     'Phone': phone
                 }
-                # Proceed to generate the report
-                generate_report_and_save()
-                st.session_state.current_page = 'report'
-                st.rerun()
-            else:
-                st.error("Please fill in all fields.")
+            # Proceed to generate the report
+            generate_report_and_save()
+            st.session_state.current_page = 'report'
+            st.rerun()
+        else:
+            st.error("Please fill in all fields.")
     
     elif st.session_state.current_page == 'report':
         st.title("Your Assessment Report is Ready")
