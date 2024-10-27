@@ -454,14 +454,14 @@ def generate_final_report():
     if not st.session_state.completed_topics:
         st.error("Please complete at least one topic assessment before generating the report.")
         return
-    
+
     # Generate PDF report only for completed topics
     pdf_output = generate_assessment_pdf(
         st.session_state.responses,
         st.session_state.user_info,
         (0, 5)
     )
-    
+
     # Ensure we have a valid PDF output
     if pdf_output is None:
         st.error("Failed to generate the PDF report.")
@@ -473,7 +473,7 @@ def generate_final_report():
         **st.session_state.user_info,
         **st.session_state.responses
     }
-    
+
     if add_assessment_data_to_google_sheet(user_data):
         st.session_state.assessment_pdf = pdf_output.getvalue()  # Extract byte value
         st.session_state.assessment_submitted = True
@@ -489,6 +489,7 @@ if st.session_state.assessment_submitted and st.session_state.assessment_pdf:
         file_name="maturity_assessment_report.pdf",
         mime="application/pdf"
     )
+
 
 
 # Strategy Tool Module
@@ -637,7 +638,7 @@ def strategy_tool():
         else:
             st.error("Please fill in all the contact information fields before downloading the report.")
 
-    # Display the download button if the form has been submitted
+   # Display the download button if the form has been submitted
     if st.session_state.form_submitted and st.session_state.pdf_output:
         st.download_button(
             label="Click here to download your report",
