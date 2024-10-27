@@ -344,6 +344,7 @@ def generate_report_and_save():
     else:
         st.error("Failed to save assessment data.")
 
+
 def create_topic_tile(topic_name: str, description: str):
     # Create a clickable tile with consistent styling and fixed height
     tile_style = f"""
@@ -451,7 +452,7 @@ def display_topic_assessment(topic_name: str):
     # Get questions for current topic
     topic_questions = next(
         (topic for topic in maturity_questions['topics']
-         if topic['name'] == topic_name),
+             if topic['name'] == topic_name),
         None
     )
     
@@ -478,17 +479,13 @@ def display_topic_assessment(topic_name: str):
     if submitted:
         st.session_state.completed_topics.add(topic_name)
         st.success("Your assessment has been submitted.")
-        # Present options to the user outside the form
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Continue to Other Topics"):
-                st.session_state.current_page = 'topic_selection'
-                st.rerun()  # Force the app to rerun and display the topic selection page
-        with col2:
-            if st.button("Generate Final Report"):
-                # Set the page to 'contact_info' to display the contact info form
-                st.session_state.current_page = 'contact_info'
-                st.rerun()  # Force the app to rerun and display the contact info form
+        # Display informational message
+        st.info("You can download your report by returning to the topics page using the 'Back to Topics' button and scrolling to the bottom.")
+    
+    # Add the 'Back to Topics' button outside the if block so it's always available
+    if st.button("Back to Topics"):
+        st.session_state.current_page = 'topic_selection'
+        st.rerun()
 
 def generate_final_report():
     if not st.session_state.completed_topics:
@@ -694,27 +691,27 @@ def maturity_assessment():
                     'Email': email,
                     'Company': company,
                     'Phone': phone
-            }
-            # Proceed to generate the report
-            generate_report_and_save()
-            st.session_state.current_page = 'report'
-            st.rerun()  # Force the app to rerun and display the report page
-        else:
-            st.error("Please fill in all fields.")
+                }
+                # Proceed to generate the report
+                generate_report_and_save()
+                st.session_state.current_page = 'report'
+                st.rerun()
+            else:
+                st.error("Please fill in all fields.")
     
     elif st.session_state.current_page == 'report':
         st.title("Your Assessment Report is Ready")
         st.success("Assessment completed! You can now download your report.")
         pdf_output = st.session_state.assessment_pdf  # Use the stored PDF output
         if pdf_output:
-           st.download_button(
-               label="Download Assessment Report",
-               data=pdf_output.getvalue(),
-               file_name="maturity_assessment_report.pdf",
-               mime="application/pdf"
-           )
-    else:
-        st.error("No report available for download.")
+            st.download_button(
+                label="Download Assessment Report",
+                data=pdf_output.getvalue(),
+                file_name="maturity_assessment_report.pdf",
+                mime="application/pdf"
+            )
+        else:
+            st.error("No report available for download.")
 
 # Main application logic
 if app_mode == "Strategy Tool":
