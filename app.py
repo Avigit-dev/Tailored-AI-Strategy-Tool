@@ -202,7 +202,6 @@ def generate_pdf(goal, method, tool, kpi, use_cases, partners):
     pdf_buffer.seek(0)
     return pdf_buffer
 
-
 # Generate PDF functions for Maturity Assessment
 def generate_assessment_pdf(responses, user_info, y_axis_range):
     pdf_buffer = io.BytesIO()
@@ -317,7 +316,6 @@ def generate_assessment_pdf(responses, user_info, y_axis_range):
     pdf_buffer.seek(0)
     return pdf_buffer
 
-
 # New helper functions for maturity assessment
 def generate_report_and_save():
     # Generate PDF report only for completed topics
@@ -342,12 +340,9 @@ def generate_report_and_save():
     if add_assessment_data_to_google_sheet(user_data):
         st.session_state.assessment_pdf = pdf_output
         st.session_state.assessment_submitted = True
-        st.success("Assessment completed! You can now download your report.")
-        # No need to call st.rerun()
+        # Do not display messages here; we'll show them on the report page
     else:
         st.error("Failed to save assessment data.")
-
-
 
 def create_topic_tile(topic_name: str, description: str):
     # Create a clickable tile with consistent styling and fixed height
@@ -372,7 +367,6 @@ def create_topic_tile(topic_name: str, description: str):
         </div>
     """
     return tile_style
-
 
 def get_topic_description(topic_name: str) -> str:
     # Add descriptions for each topic
@@ -435,8 +429,6 @@ def display_topic_tiles():
                                     st.session_state.show_dialog = None
                                     st.rerun()
 
-
-
 def display_topic_dialog():
     if st.session_state.show_dialog:
         topic_name = st.session_state.show_dialog
@@ -491,15 +483,12 @@ def display_topic_assessment(topic_name: str):
         with col1:
             if st.button("Continue to Other Topics"):
                 st.session_state.current_page = 'topic_selection'
-                st.rerun()
+                st.experimental_rerun()  # Force the app to rerun and display the topic selection page
         with col2:
             if st.button("Generate Final Report"):
                 # Set the page to 'contact_info' to display the contact info form
                 st.session_state.current_page = 'contact_info'
-                st.rerun()
-
-
-
+                st.experimental_rerun()  # Force the app to rerun and display the contact info form
 
 def generate_final_report():
     if not st.session_state.completed_topics:
@@ -507,10 +496,6 @@ def generate_final_report():
         return
     else:
         generate_report_and_save()
-
-
-
-
 
 # Strategy Tool Module
 def strategy_tool():
@@ -667,7 +652,6 @@ def strategy_tool():
             mime="application/pdf"
         )
 
-
 # Modified maturity_assessment function
 def maturity_assessment():
     # Load and display images
@@ -710,28 +694,27 @@ def maturity_assessment():
                     'Email': email,
                     'Company': company,
                     'Phone': phone
-                }
-                st.success("Your information has been submitted.")
-                # Proceed to generate the report
-                st.session_state.current_page = 'report'
-                generate_report_and_save()
-            else:
-                st.error("Please fill in all fields.")
+            }
+            # Proceed to generate the report
+            generate_report_and_save()
+            st.session_state.current_page = 'report'
+            st.experimental_rerun()  # Force the app to rerun and display the report page
+        else:
+            st.error("Please fill in all fields.")
     
     elif st.session_state.current_page == 'report':
         st.title("Your Assessment Report is Ready")
+        st.success("Assessment completed! You can now download your report.")
         pdf_output = st.session_state.assessment_pdf  # Use the stored PDF output
         if pdf_output:
-            st.download_button(
-                label="Download Assessment Report",
-                data=pdf_output.getvalue(),
-                file_name="maturity_assessment_report.pdf",
-                mime="application/pdf"
-            )
-        else:
-            st.error("No report available for download.")
-
-
+           st.download_button(
+               label="Download Assessment Report",
+               data=pdf_output.getvalue(),
+               file_name="maturity_assessment_report.pdf",
+               mime="application/pdf"
+           )
+    else:
+        st.error("No report available for download.")
 
 # Main application logic
 if app_mode == "Strategy Tool":
