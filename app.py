@@ -473,16 +473,17 @@ def generate_final_report():
         st.session_state.assessment_pdf = pdf_output
         st.session_state.assessment_submitted = True
         st.success("Assessment completed! You can now download your report.")
-        
-        # Display download button
-        st.download_button(
-            label="Download Assessment Report",
-            data=st.session_state.assessment_pdf,
-            file_name="maturity_assessment_report.pdf",
-            mime="application/pdf"
-        )
     else:
         st.error("Failed to save assessment data.")
+
+# Then, outside of the form
+if st.session_state.assessment_submitted and st.session_state.assessment_pdf:
+    st.download_button(
+        label="Download Assessment Report",
+        data=st.session_state.assessment_pdf,
+        file_name="maturity_assessment_report.pdf",
+        mime="application/pdf"
+    )
 
 # Strategy Tool Module
 def strategy_tool():
