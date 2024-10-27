@@ -467,6 +467,9 @@ def generate_final_report():
         st.error("Failed to generate the PDF report.")
         return
 
+     # Debugging statement to confirm PDF generation
+    st.write("PDF successfully generated, ready for download.")  # <-- Add this line here
+
     # Save to Google Sheets
     user_data = {
         'Timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
