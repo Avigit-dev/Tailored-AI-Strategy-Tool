@@ -478,16 +478,16 @@ def display_topic_assessment(topic_name: str):
         st.write("### Assessment Questions")
         for question in topic_questions['questions']:
             q_id = question['id']
-            st.write(question['question'])
-            response = st.radio(
-                f"Select maturity level for question {q_id}",
+            # Replace st.radio with st.select_slider
+            response = st.select_slider(
+                label=question['question'],
                 options=[1, 2, 3, 4, 5],
                 format_func=lambda x: f"{x} - {maturity_questions['scale'][str(x)]}",
                 key=f"q_{q_id}"
             )
             st.session_state.responses[q_id] = response
         
-        submitted = st.form_submit_button("Submit Assessment")  # Removed 'key' parameter
+        submitted = st.form_submit_button("Submit Assessment")
     
     if submitted:
         st.session_state.completed_topics.add(topic_name)
@@ -499,6 +499,7 @@ def display_topic_assessment(topic_name: str):
     if st.button("Back to Topics", key=f"back_{topic_name}"):
         st.session_state.current_page = 'topic_selection'
         st.rerun()
+
 
 def generate_final_report():
     if not st.session_state.completed_topics:
