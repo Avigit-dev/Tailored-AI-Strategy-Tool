@@ -463,47 +463,50 @@ def display_topic_assessment(topic_name: str):
     st.title(f"{topic_name} Assessment")
     
     # Get questions for current topic
-    topic_questions = next(
-        (topic for topic in maturity_questions['topics']
-             if topic['name'] == topic_name),
+    topic = next(
+        (t for t in maturity_questions['topics'] if t['name'] == topic_name),
         None
     )
     
-    if not topic_questions:
+    if not topic:
         st.error(f"No questions found for topic: {topic_name}")
         return
     
-    # Display assessment questions
-    with st.form(key=f"assessment_form_{topic_name}"):
-        st.write("### Assessment Questions")
-        for question in topic_questions['questions']:
-            q_id = question['id']
-            # Replace st.radio with st.slider
-            response = st.slider(
-                label=question['question'],
-                min_value=1,
-                max_value=5,
-                value=3,  # Default value
-                step=1,
-                format="%d - %s",
-                key=f"q_{q_id}"
-            )
-            # Display the maturity level description
-            st.caption(f"Selected maturity level: {response} - {maturity_questions['scale'][str(response)]}")
-            st.session_state.responses[q_id] = response
-        
-        submitted = st.form_submit_button("Submit Assessment")
+    # Initialize responses if not already done
+    if 'responses' not in st.session_state:
+        st.session_state.responses = {}
     
-    if submitted:
+    st.write("### Assessment Questions")
+    for question in topic['questions']:
+        q_id = question['id']
+        # Get previous response if any
+        previous_response = st.session_state.responses.get(q_id, 3)
+        response = st.slider(
+            label=question['question'],
+            min_value=1,
+            max_value=5,
+            value=previous_response,
+            step=1,
+            format="%d",
+            key=f"q_{q_id}"
+        )
+        # Display the maturity level description
+        maturity_description = maturity_questions['scale'][str(response)]
+        st.caption(f"Selected maturity level: {response} - {maturity_description}")
+        st.session_state.responses[q_id] = response
+    
+    # Use a button to submit the assessment
+    if st.button("Submit Assessment", key=f"submit_{topic_name}"):
         st.session_state.completed_topics.add(topic_name)
         st.success("Your assessment has been submitted.")
-        # Display informational message
+        # Inform the user about the next steps
         st.info("You can download your report by returning to the topics page using the 'Back to Topics' button and scrolling to the bottom.")
     
-    # Add the 'Back to Topics' button outside the if block so it's always available
+    # Add the 'Back to Topics' button
     if st.button("Back to Topics", key=f"back_{topic_name}"):
         st.session_state.current_page = 'topic_selection'
         st.rerun()
+
 
 
 
