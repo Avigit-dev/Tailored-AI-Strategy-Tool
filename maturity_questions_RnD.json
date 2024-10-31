@@ -1,0 +1,213 @@
+{
+  "scale": {
+    "1": "Not at all / No Progress",
+    "2": "To a small extent / Minimal Progress",
+    "3": "To a moderate extent / Moderate Progress",
+    "4": "To a great extent / Significant Progress",
+    "5": "Fully achieved / Optimized"
+  },
+  "topics": [
+    {
+      "name": "Strategy and Alignment",
+      "abbreviation": "SA",
+      "questions": [
+        {
+          "id": "SA Q1",
+          "question": "How clearly are R&D objectives aligned with the overall business strategy and its strategic priorities?"
+        },
+        {
+          "id": "SA Q2",
+          "question": "How effectively are R&D activities aligned with product and service development roadmaps?"
+        },
+        {
+          "id": "SA Q3",
+          "question": "To what extent are your R&D objectives aligned with the Voice of the Customer (VOC)?"
+        },
+        {
+          "id": "SA Q4",
+          "question": "How well do you utilize market research and competitive intelligence to inform your R&D initiatives?"
+        },
+        {
+          "id": "SA Q5",
+          "question": "What clear KPIs and metrics do you use to assess the effectiveness of your R&D initiatives, and how frequently are they monitored and reviewed?"
+        }
+      ]
+    },
+    {
+      "name": "Performance and Measurement",
+      "abbreviation": "PM",
+      "questions": [
+        {
+          "id": "PM Q1",
+          "question": "What is your R&D's timeline adherence, i.e., how well do you meet planned timelines for your R&D projects?"
+        },
+        {
+          "id": "PM Q2",
+          "question": "What is the return on investment for your R&D spending?"
+        },
+        {
+          "id": "PM Q3",
+          "question": "What is the overall impact and value your R&D delivers to the organization?"
+        }
+      ]
+    },
+    {
+      "name": "Resource Allocation and Decision Making",
+      "abbreviation": "RAD",
+      "questions": [
+        {
+          "id": "RAD Q1",
+          "question": "How well do you identify, evaluate, and impact future trends and market shifts?"
+        },
+        {
+          "id": "RAD Q2",
+          "question": "How does the quality of R&D output impact overall business goals?"
+        },
+        {
+          "id": "RAD Q3",
+          "question": "How transparent and adaptable is your process for resource allocation within R&D initiatives?"
+        },
+        {
+          "id": "RAD Q4",
+          "question": "To what extent are decisions aligned with the organizational structure, and at what levels are your R&D decision-making processes occurring?"
+        }
+      ]
+    },
+    {
+      "name": "Cross-functional Integration",
+      "abbreviation": "CFI",
+      "questions": [
+        {
+          "id": "CFI Q1",
+          "question": "How well do you align R&D goals with other departments within the organization?"
+        },
+        {
+          "id": "CFI Q2",
+          "question": "How well do you foster a collaborative and communicative environment throughout the innovation process?"
+        }
+      ]
+    },
+    {
+      "name": "Organizational Learning",
+      "abbreviation": "OL",
+      "questions": [
+        {
+          "id": "OL Q1",
+          "question": "How do you ensure knowledge is collected, shared, and retained throughout the R&D lifecycle?"
+        },
+        {
+          "id": "OL Q2",
+          "question": "How are lessons learned from your R&D endeavors translated into practice and improvements?"
+        }
+      ]
+    },
+    {
+      "name": "User-Centric Processes",
+      "abbreviation": "UCP",
+      "questions": [
+        {
+          "id": "UCP Q1",
+          "question": "How do you manage and balance requirements throughout the development process?"
+        },
+        {
+          "id": "UCP Q2",
+          "question": "How do your teams collaborate and share information throughout the development process?"
+        },
+        {
+          "id": "UCP Q3",
+          "question": "How do you ensure your R&D results valuable and relevant to the end-user?"
+        }
+      ]
+    },
+    {
+      "name": "Digital Technologies",
+      "abbreviation": "DT",
+      "questions": [
+        {
+          "id": "DT Q1",
+          "question": "What is your approach to using digital tools in your R&D processes?"
+        },
+        {
+          "id": "DT Q2",
+          "question": "How do you optimize your tools and technologies throughout the development and innovation life cycle?"
+        },
+        {
+          "id": "DT Q3",
+          "question": "What is your level of skill in design thinking and human-centered design?"
+        },
+        {
+          "id": "DT Q4",
+          "question": "To what extent do you utilize VR/AR in product development?"
+        },
+        {
+          "id": "DT Q5",
+          "question": "How do you remain informed about and adapt to emerging technologies in your R&D domain?"
+        }
+      ]
+    },
+    {
+      "name": "Data and Knowledge Management",
+      "abbreviation": "DKM",
+      "questions": [
+        {
+          "id": "DKM Q1",
+          "question": "How do you manage, process, and analyze the data generated in your R&D processes?"
+        },
+        {
+          "id": "DKM Q2",
+          "question": "How do you leverage cloud and high-performance computing in your R&D?"
+        }
+      ]
+    },
+    {
+      "name": "Innovation Partnerships",
+      "abbreviation": "IP",
+      "questions": [
+        {
+          "id": "IP Q1",
+          "question": "How do you identify, build, and manage strategic partnerships for R&D and innovation?"
+        },
+        {
+          "id": "IP Q2",
+          "question": "At your R&D process, how do you remain adaptable and implement new R&D ideas and approaches?"
+        }
+      ]
+    },
+    {
+      "name": "Talent and Culture",
+      "abbreviation": "TC",
+      "questions": [
+        {
+          "id": "TC Q1",
+          "question": "How do you attract, develop, and retain R&D talent?"
+        },
+        {
+          "id": "TC Q2",
+          "question": "How do you foster a continuous learning and development culture within your R&D teams?"
+        },
+        {
+          "id": "TC Q3",
+          "question": "How effective is your R&D leadership in driving innovation and creating a supportive environment?"
+        }
+      ]
+    },
+    {
+      "name": "Sustainability in R&D",
+      "abbreviation": "SR",
+      "questions": [
+        {
+          "id": "SR Q1",
+          "question": "How does your R&D contribute to minimizing the environmental impact of your products and processes?"
+        },
+        {
+          "id": "SR Q2",
+          "question": "To what extent do you use Life Cycle Assessment (LCA) to evaluate the environmental impact of your R&D activities?"
+        },
+        {
+          "id": "SR Q3",
+          "question": "In what ways are you actively considering and addressing environmental, social, and governance (ESG) factors in your R&D?"
+        }
+      ]
+    }
+  ]
+}
